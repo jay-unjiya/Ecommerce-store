@@ -52,10 +52,16 @@ const AdminOrderPage = () => {
                   <td>{product.category}</td>
                   <td>{product.price.toFixed(2)}</td>
                   <td>{product.quantity}</td>
-                  <td>{order.totalPrice}</td>
+                  {idx === 0 && (
+                    <>
+                      <td rowSpan={order.products.length}>{order.totalPrice}</td>
+                    </>
+                  )}
                 </tr>
               ))}
+              
             </React.Fragment>
+
           ))}
         </tbody>
       </table>

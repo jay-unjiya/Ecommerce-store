@@ -5,7 +5,7 @@ const Order = require('../models/orderModel');
 router.post('/create', async (req, res) => {
   try {
     const { userId,totalPrice, cartItems } = req.body;
-    
+    console.log(req.body)
     const newOrder = new Order({
       userId,
       totalPrice,

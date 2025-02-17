@@ -79,7 +79,7 @@ const Navbar = () => {
         navigate('/login');
       });
     } else {
-      navigate('/signup');
+      navigate('/login');
     }
   };
 
