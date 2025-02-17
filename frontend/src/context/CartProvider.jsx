@@ -11,6 +11,7 @@ export const CartProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const BASE_URL = "http://localhost:5000/api";
 
   const fetchCartProducts = async () => {
     try {
@@ -18,18 +19,18 @@ export const CartProvider = ({ children }) => {
       const token = localStorage.getItem('token');
 
       if (token) {
-        const res = await axios.post('http://localhost:5000/api/check/verifyAccess', {}, {
+        const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
         });
 
         if (res.data.success) {
           const userId = res.data.id;
-          const response = await fetch(`http://localhost:5000/api/cart/${userId}`);
+          const response = await fetch(`${BASE_URL}/cart/${userId}`);
           const data = await response.json();
           if (data.success) {
             const productDetails = await Promise.all(
               data.cart.map(async ({ productId, quantity }) => {
-                const res = await fetch(`http://localhost:5000/api/products/${productId}`);
+                const res = await fetch(`${BASE_URL}/products/${productId}`);
                 const productData = await res.json();
                 return { ...productData, quantity };
               })
@@ -43,7 +44,7 @@ export const CartProvider = ({ children }) => {
 
         const productDetails = await Promise.all(
           productIds.map(async ({ productId, quantity }) => {
-            const res = await fetch(`http://localhost:5000/api/products/${productId}`);
+            const res = await fetch(`${BASE_URL}/products/${productId}`);
             const productData = await res.json();
             return { ...productData, quantity };
           })
@@ -62,7 +63,7 @@ export const CartProvider = ({ children }) => {
   const checkAdminLogin = () => {
     const adminToken = localStorage.getItem('admin-token');
     if (adminToken) {
-      axios.post('http://localhost:5000/api/check/verifyAdminAccess', {}, {
+      axios.post(`${BASE_URL}/check/verifyAdminAccess`, {}, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${adminToken}`
@@ -86,13 +87,13 @@ export const CartProvider = ({ children }) => {
       console.log(updatedProducts)
       const token = localStorage.getItem('token');
       if (token) {
-        const res = await axios.post('http://localhost:5000/api/check/verifyAccess', {}, {
+        const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
         });
 
         if (res.data.success) {
           const userId = res.data.id;
-          await axios.post('http://localhost:5000/api/cart/save', {
+          await axios.post(`${BASE_URL}/cart/save`, {
             userId,
             items: updatedProducts.map(product => ({ productId: product._id, quantity: product.quantity }))
           });
@@ -140,7 +141,7 @@ export const CartProvider = ({ children }) => {
 
       const token = localStorage.getItem('token');
       if (token) {
-        const res = await axios.post('http://localhost:5000/api/check/verifyAccess', {}, {
+        const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -150,7 +151,7 @@ export const CartProvider = ({ children }) => {
         if (res.data.success) {
           const userId = res.data.id;
           if (updatedProducts.length > 0) {
-            await axios.post('http://localhost:5000/api/cart/save', {
+            await axios.post(`${BASE_URL}/cart/save`, {
               userId,
               items: updatedProducts.map(product => ({
                 productId: product.productId,
@@ -158,7 +159,7 @@ export const CartProvider = ({ children }) => {
               }))
             });
           } else {
-            await axios.delete('http://localhost:5000/api/cart/clear', { data: { userId } });
+            await axios.delete(`${BASE_URL}/cart/clear`, { data: { userId } });
           }
         }
       }
@@ -172,7 +173,7 @@ export const CartProvider = ({ children }) => {
 
   const handleAddToCart = async (productId, quantity, openCart) => {
     try {
-      const productResponse = await fetch(`http://localhost:5000/api/products/${productId}`);
+      const productResponse = await fetch(`${BASE_URL}/products/${productId}`);
       const productData = await productResponse.json();
 
       const savedProducts = localStorage.getItem('products');
@@ -209,7 +210,7 @@ export const CartProvider = ({ children }) => {
 
       const token = localStorage.getItem('token');
       if (token) {
-        const res = await axios.post('http://localhost:5000/api/check/verifyAccess', {}, {
+        const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -218,7 +219,7 @@ export const CartProvider = ({ children }) => {
 
         if (res.data.success) {
           const userId = res.data.id;
-          await axios.post('http://localhost:5000/api/cart/save', {
+          await axios.post(`${BASE_URL}/cart/save`, {
             userId,
             items: updatedProducts.map(product => ({
               productId: product.productId,
@@ -237,7 +238,7 @@ export const CartProvider = ({ children }) => {
     try {
       const localCart = JSON.parse(localStorage.getItem('products')) || [];
       
-      const dbCartRes = await axios.get(`http://localhost:5000/api/cart/${userId}`);
+      const dbCartRes = await axios.get(`${BASE_URL}/cart/${userId}`);
       let dbCart = [];
       
       if (dbCartRes.data.success) {
@@ -254,7 +255,7 @@ export const CartProvider = ({ children }) => {
         quantity 
       }));
 
-      await axios.post('http://localhost:5000/api/cart/save', { 
+      await axios.post(`${BASE_URL}/cart/save`, { 
         userId, 
         items: mergedCart 
       });
@@ -268,7 +269,7 @@ export const CartProvider = ({ children }) => {
   };
   const manageCartSignup = async()=>{
     const localCart = JSON.parse(localStorage.getItem('products')) || [];
-    await axios.post('http://localhost:5000/api/cart/save', { 
+    await axios.post(`${BASE_URL}/cart/save`, { 
       userId, 
       items: mergedCart 
     });
@@ -308,7 +309,7 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider value={{ 
       products, loading, checkbox, setCheckbox, handleAddToCart,handleRemove,syncCartAfterLogin,
-      handleQuantityChange, calculateSubtotal, handleSubmitCart,handleCartUpdate,isAdmin,setIsAdmin
+      handleQuantityChange, calculateSubtotal, handleSubmitCart,handleCartUpdate,isAdmin,setIsAdmin,BASE_URL
     }}>
       {children}
     </CartContext.Provider>

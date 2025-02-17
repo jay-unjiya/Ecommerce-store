@@ -24,11 +24,13 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const {isAdmin,setIsAdmin} = useCart()
+  const { BASE_URL } = useCart()
+
 
   useEffect(() => {
     const adminToken = localStorage.getItem('admin-token');
     if (adminToken) {
-      axios.post('http://localhost:5000/api/check/verifyAdminAccess', {}, {
+      axios.post(`${BASE_URL}/check/verifyAdminAccess`, {}, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${adminToken}`
@@ -51,7 +53,7 @@ const Navbar = () => {
     const token = localStorage.getItem('token');
     const adminToken = localStorage.getItem('admin-token');
     if (adminToken) {
-      axios.post('http://localhost:5000/api/check/verifyAdminAccess', {}, {
+      axios.post(`${BASE_URL}/check/verifyAdminAccess`, {}, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${adminToken}`
@@ -64,7 +66,7 @@ const Navbar = () => {
         navigate('/login');
       });
     } else if (token) {
-      axios.post('http://localhost:5000/api/check/verifyAccess', {}, {
+      axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`

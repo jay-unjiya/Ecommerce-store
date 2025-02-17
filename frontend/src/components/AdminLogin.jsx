@@ -6,9 +6,10 @@ import { useNavigate } from "react-router-dom";
 import logo from '../assets/logo2.png';
 import Footer from './Footer';
 import '../scss/Signup.scss';
-
+import { useCart } from "../context/CartProvider";
 const AdminLogin = () => {
     const navigate = useNavigate();
+      const { BASE_URL } = useCart()
 
     const validationSchema = Yup.object({
         email: Yup.string().email('Invalid email format').required('Email is required'),
@@ -23,7 +24,7 @@ const AdminLogin = () => {
         validationSchema: validationSchema,
         onSubmit: async (values) => {
             try {
-                const response = await axios.post('http://localhost:5000/api/auth/admin/login/', {
+                const response = await axios.post(`${BASE_URL}/auth/admin/login/`, {
                     email: values.email,
                     password: values.password,
                 });

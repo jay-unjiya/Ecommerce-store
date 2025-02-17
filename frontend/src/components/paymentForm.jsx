@@ -3,6 +3,7 @@ import { CardElement, useStripe, useElements, CardNumberElement, CardCvcElement,
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../scss/paymentForm.scss'
+import { useCart } from '../context/CartProvider';
 
 const PaymentForm = ({ totalprice, onSuccess }) => {
     const stripe = useStripe()
@@ -12,11 +13,13 @@ const PaymentForm = ({ totalprice, onSuccess }) => {
     const [processing, setProcessing] = useState(false)
     const [success, setSuccess] = useState(false)
     const naviate = useNavigate()
+    const { BASE_URL } = useCart()
+
 
     useEffect(() => {
         const getClientSecret = async (totalprice) => {
             try {
-                const { data } = await axios.post(`http://localhost:5000/api/payment/create?total=${totalprice * 100}`)
+                const { data } = await axios.post(`${BASE_URL}/payment/create?total=${totalprice * 100}`)
                 if (data && data.clientSecret) {
                     setClientSecret(data.clientSecret)
                 } else {

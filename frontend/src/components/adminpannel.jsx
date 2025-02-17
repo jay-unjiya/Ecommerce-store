@@ -14,7 +14,8 @@ import { useCart } from '../context/CartProvider';
 
 const AdminPanel = () => {
     const navigate = useNavigate();
-    
+      const { BASE_URL } = useCart()
+
     const {isAdmin, setIsAdmin} = useCart();
     const [section, setSection] = useState('overview');
     const [userCount, setUserCount] = useState(0);
@@ -29,7 +30,7 @@ const AdminPanel = () => {
         if (!token) {
             navigate('/login');
         } else {
-            axios.post('http://localhost:5000/api/check/verifyAdminAccess', {}, {
+            axios.post(`${BASE_URL}/check/verifyAdminAccess`, {}, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -47,7 +48,7 @@ const AdminPanel = () => {
     useEffect(() => {
         const fetchDetails = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/details');
+                const response = await axios.get(`${BASE_URL}/details`);
                 setUserCount(response.data.userCount);
                 setProductCount(response.data.productCount);
                 setOrderCount(response.data.orderCount);
@@ -64,7 +65,7 @@ const AdminPanel = () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/categories');
+            const response = await axios.get(`${BASE_URL}/categories`);
             setCategories(response.data);
         } catch (error) {
             console.error('Error fetching categories:', error);

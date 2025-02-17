@@ -4,15 +4,17 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import '../scss/AdminPanel.scss';
 import { RiDownloadCloud2Line } from "react-icons/ri";
-
+import { useCart } from '../context/CartProvider';
 
 const OrderHistory = ({ userId, user }) => {
   const [orders, setOrders] = useState([]);
+  const { BASE_URL } = useCart()
+
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/orders/user/${userId}`);
+        const response = await axios.get(`${BASE_URL}/orders/user/${userId}`);
         console.log(response.data);
         setOrders(response.data.orders || []); // Ensure orders is an array
       } catch (error) {

@@ -11,8 +11,8 @@ import { useCart } from '../context/CartProvider'; // Add this import
 const Login = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const { syncCartAfterLogin } = useCart(); // Add this
-
+    const { syncCartAfterLogin, BASE_URL } = useCart(); // Add this
+    
 
 
     const handleLogin = async () => {
@@ -21,7 +21,7 @@ const Login = () => {
             const token = localStorage.getItem('token');
             if (!token) return;
 
-            const res = await axios.post('http://localhost:5000/api/check/verifyAccess', {}, {
+            const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -42,7 +42,7 @@ const Login = () => {
         const adminToken = localStorage.getItem('admin-token');
 
         if (token || adminToken) {
-            const endpoint = token ? 'http://localhost:5000/api/check/verifyAccess' : 'http://localhost:5000/api/check/verifyAdminAccess';
+            const endpoint = token ? `${BASE_URL}/check/verifyAccess` : `${BASE_URL}/check/verifyAdminAccess`;
             const authToken = token || adminToken;
 
             axios.post(endpoint, {}, {
@@ -77,7 +77,7 @@ const Login = () => {
         validationSchema: validationSchema,
         onSubmit: async (values) => {
             try {
-                const endpoint = 'http://localhost:5000/api/auth/login';
+                const endpoint = `${BASE_URL}/auth/login`;
                 const response = await axios.post(endpoint, {
                     email: values.email,
                     password: values.password,

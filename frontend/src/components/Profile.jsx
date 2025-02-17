@@ -6,7 +6,7 @@ import adminImg from '../assets/man.png';
 import orderIcon from '../assets/ordericon.png';
 import CountUp from 'react-countup';
 import OrderHistory from './OrderHistory';
-
+import { useCart } from '../context/CartProvider';
 const Profile = () => {
 
     const navigate = useNavigate();
@@ -14,6 +14,7 @@ const Profile = () => {
     const [section, setSection] = useState('overview');
     const [orderCount, setOrderCount] = useState(0);
     const [user, setUser] = useState(null);
+    const { BASE_URL } = useCart()
 
     useEffect(() => {
         if (!id) {
@@ -21,14 +22,14 @@ const Profile = () => {
         } else {
             const token = localStorage.getItem('token');
             if (token) {
-                axios.post('http://localhost:5000/api/check/verifyAccess', {}, {
+                axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     }
                 }).then((res) => {
                     if (res.data.success) {
-                        axios.post('http://localhost:5000/api/profile', { id })
+                        axios.post(`${BASE_URL}/profile`, { id })
                             .then(response => {
                                 setUser(response.data.user);
                             })
@@ -52,7 +53,7 @@ const Profile = () => {
     const fetchDetails = async () => {
         try {
             console.log("hii")
-            const response = await axios.get(`http://localhost:5000/api/orders/orderDetails/${id}`);
+            const response = await axios.get(`${BASE_URL}/orders/orderDetails/${id}`);
 
             setOrderCount(response.data);
 

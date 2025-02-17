@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../scss/AdminPanel.scss';
 import { GiSplitCross } from "react-icons/gi";
+import {useCart} from '../context/CartProvider'
 
 const AdminProduct = ({ category }) => {
     const [products, setProducts] = useState([]);
@@ -11,10 +12,12 @@ const AdminProduct = ({ category }) => {
     const [currentProduct, setCurrentProduct] = useState({
         title: '', image: '', price: '', description: '', brand: '', model: '', color: '', category: ''
     });
+    const { BASE_URL } = useCart()
+
     const [isEditMode, setIsEditMode] = useState(false);
     const fetchCategories = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/categories');
+            const response = await axios.get(`${BASE_URL}/categories`);
             setCategories(response.data);
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -28,7 +31,7 @@ const AdminProduct = ({ category }) => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                let url = 'http://localhost:5000/api/product';
+                let url = `${BASE_URL}/product`;
                 if (category) {
                     url += `?category=${category}`;
                 }
@@ -78,7 +81,7 @@ const AdminProduct = ({ category }) => {
             if (!confirmation) {
                 return;
             }
-            await axios.delete('http://localhost:5000/api/deleteProduct', { data: { id: productId } });
+            await axios.delete(`${BASE_URL}/deleteProduct`, { data: { id: productId } });
             setProducts(products.filter(product => product._id !== productId));
         } catch (error) {
             console.error('Error deleting product:', error);
@@ -94,10 +97,10 @@ const AdminProduct = ({ category }) => {
             });
 
             if (isEditMode) {
-                await axios.patch(`http://localhost:5000/api/updateProduct/${currentProduct._id}`, currentProduct);
+                await axios.patch(`${BASE_URL}/updateProduct/${currentProduct._id}`, currentProduct);
                 setProducts(products.map(product => (product._id === currentProduct._id ? currentProduct : product)));
             } else {
-                const response = await axios.post('http://localhost:5000/api/addProduct', currentProduct);
+                const response = await axios.post(`${BASE_URL}/addProduct`, currentProduct);
                 setProducts([response.data.data, ...products]);
             }
 

@@ -2,14 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../scss/AdminPanel.scss';
+import { useCart } from '../context/CartProvider';
 
 const AdminOrderPage = () => {
   const [orders, setOrders] = useState([]);
+  const { BASE_URL } = useCart()
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/orders');
+        const response = await axios.get(`${BASE_URL}/orders`);
         setOrders(response.data);
       } catch (error) {
         console.error('Error fetching orders:', error);

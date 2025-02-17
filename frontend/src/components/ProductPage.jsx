@@ -17,14 +17,14 @@ const ProductPage = () => {
   const thumbnailRefs = useRef([]);
   const navigate = useNavigate();
   const { id } = useParams();
-  const { handleAddToCart } = useCart();
-
+  const { handleAddToCart,BASE_URL } = useCart();
+  
   const productImages = product?.image ? Array(10).fill(product.image) : [];
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/products/${id}`);
+        const response = await axios.get(`${BASE_URL}/products/${id}`);
         setProduct(response.data);
       } catch (error) {
         console.error('Error fetching product:', error);

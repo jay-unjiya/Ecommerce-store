@@ -12,7 +12,7 @@ import axios from 'axios';
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import PaymentForm from './paymentForm';
-
+import { useCart } from '../context/CartProvider';
 
 const Checkout = ({ product, onClose }) => {
   const [step, setStep] = useState('mobile');
@@ -25,6 +25,7 @@ const Checkout = ({ product, onClose }) => {
   const [cart, setCart] = useState([]);
   const [isModelOpen, setIsModelOpen] = useState(false)
   const stripePromise = loadStripe('pk_test_51QrewxAu6uomlIJDKT8I4khY0DMG6c4WtX9TeG5N6lV9QpYCcMUE0T8dYIp1NjqJlmBT1HdqgcicNJaeVQ3Vd7dh00So7RqyrW');
+  const { BASE_URL } = useCart()
 
 
 
@@ -42,7 +43,7 @@ const Checkout = ({ product, onClose }) => {
       console.log(productIds)
       const productDetails = await Promise.all(
         productIds.map(async ({ productId, quantity }) => {
-          const response = await fetch(`http://localhost:5000/api/products/${productId}`);
+          const response = await fetch(`${BASE_URL}/products/${productId}`);
           const productData = await response.json();
           console.log(productData)
           return { ...productData, quantity };
@@ -77,7 +78,7 @@ const Checkout = ({ product, onClose }) => {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        const res = await axios.post('http://localhost:5000/api/check/verifyAccess', {}, {
+        const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -87,11 +88,11 @@ const Checkout = ({ product, onClose }) => {
           const userId = res.data.id;
           const cartItems = cart.length > 0 ? cart : [product];
           console.log(cartItems);
-          await axios.post('http://localhost:5000/api/orders/create', { userId, totalPrice,cartItems });
+          await axios.post(`${BASE_URL}/orders/create`, { userId, totalPrice,cartItems });
 
           localStorage.removeItem('products');
 
-          await axios.delete('http://localhost:5000/api/cart/clear', {
+          await axios.delete(`${BASE_URL}/cart/clear`, {
             data: { userId }
           });
 

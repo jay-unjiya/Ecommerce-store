@@ -8,9 +8,11 @@ import logo from '../assets/logo2.png';
 import Footer from './Footer';
 import { ToastContainer, toast } from 'react-toastify';
 import '../scss/Signup.scss';
+import { useCart } from "../context/CartProvider";
 
 const Signup = () => {
     const navigate = useNavigate();
+    const { BASE_URL } = useCart()
 
 
     const saveCartToDatabase = async (userId) => {
@@ -21,7 +23,7 @@ const Signup = () => {
             const items = productIds.map(({ productId, quantity }) => ({ productId, quantity }));
             console.log(items)
 
-            await axios.post('http://localhost:5000/api/cart/save', {
+            await axios.post(`${BASE_URL}/cart/save`, {
                 userId,
                 items
             });
@@ -36,7 +38,7 @@ const Signup = () => {
         const adminToken = localStorage.getItem('admin-token');
 
         if (token || adminToken) {
-            const endpoint = token ? 'http://localhost:5000/api/check/verifyAccess' : 'http://localhost:5000/api/check/verifyAdminAccess';
+            const endpoint = token ? `${BASE_URL}/check/verifyAccess` : `${BASE_URL}/check/verifyAdminAccess`;
             const authToken = token || adminToken;
 
             axios.post(endpoint, {}, {
@@ -75,7 +77,7 @@ const Signup = () => {
         validationSchema: validationSchema,
         onSubmit: async (values) => {
             try {
-                const response = await axios.post('http://localhost:5000/api/auth/signup', {
+                const response = await axios.post(`${BASE_URL}/auth/signup`, {
                     firstName: values.firstName,
                     lastName: values.lastName,
                     email: values.email,
