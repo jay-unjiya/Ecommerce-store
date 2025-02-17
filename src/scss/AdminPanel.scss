@@ -1,0 +1,349 @@
+$primary-color: #D80304;
+$white: #ffffff;
+$black: #000000;
+$background-color: rgba($black, 0.4);
+$input-background: rgba(255, 255, 255, 0.1);
+$font-family: 'Arial', sans-serif;
+$sidebarColor: #fbfbff;
+
+.admin-panel {
+    display: flex;
+    font-family: $font-family;
+    color: #333;
+
+    h2 {
+        font-size: 2rem;
+        color: #333;
+        text-align: center;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+}
+.order-history {
+    
+    h2 {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  
+  .no-orders-message {
+    font-size: 1.5rem;
+    color: #ff0000;
+    text-align: center;
+    margin-top: 50px;
+    background-color: #ffe5e5;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  .download-icon-td
+  {
+      text-align: center;
+      .download-icon{
+        width: 30px;
+      }
+      :hover{
+        color: red;
+      }
+  }
+  
+}
+  
+
+.sidebar {
+    min-width: 17%;
+    background-color: $sidebarColor;
+    padding: 20px;
+    max-height: 100vh;
+    overflow-y: scroll;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); 
+}
+
+.admin-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    color: $black;
+}
+
+.admin-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    border: 3px solid $black;
+}
+
+.sidebar-btn{
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: $black;
+    color: $white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-align: center;
+
+    &:hover {
+        background-color: rgb(33, 30, 30);
+        transform: scale(1.05);
+    }
+}
+
+.top-section {
+    display: flex;
+    flex-direction: row;
+    gap: 1%;
+
+    .add-btn {
+        background-color: $black;
+        color: $white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+
+        &:hover {
+            background-color: rgb(33, 30, 30);
+            transform: scale(1.05);
+        }
+    }
+}
+
+.content {
+    flex-grow: 1;
+    padding: 20px;
+    max-height: 100vh;
+    overflow-y: auto;
+    min-width: 83%;
+}
+
+.cards {
+    display: flex;
+    gap: 10px;
+}
+
+.card {
+    flex: 1;
+    background-color: #ecf0f1;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+}
+
+.card img.icon-small {
+    display: block;
+    margin: 0 auto 5px;
+    height: 75px;
+}
+
+.card .count {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: $white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+
+    th,
+    td {
+        padding: 15px;
+        border: 1px solid #dee2e6;
+        text-align: left;
+    }
+
+    th {
+        background-color: $black;
+        color: $white;
+    }
+
+    tbody tr {
+        &:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        &:hover {
+            background-color: #f9f9f9;
+        }
+    }
+
+    img.product-image {
+        max-width: 50px;
+        height: auto;
+        border-radius: 5px;
+    }
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: row;
+
+    button {
+        background-color: $black;
+        color: $white;
+        border: none;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        border-radius: 4px; 
+        margin-right: 5px;
+
+        &:hover {
+            background-color: rgb(33, 30, 30);
+            transform: scale(1.05);
+        }
+    }
+}
+
+#modelOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    z-index: 1000;
+}
+
+.modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: $white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    overflow-y: auto;
+    max-height: 80%;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    text-align: center;
+
+    h2 {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: $black;
+    }
+
+    label {
+        display: block;
+        font-size: 1rem;
+        font-weight: bold;
+        margin: 8px 0 4px;
+        text-align: left;
+    }
+
+    input,
+    textarea,
+    select {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: $input-background;
+        color: $black;
+        margin-bottom: 15px;
+        outline: none;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: #999;
+        font-size: 0.9rem;
+    }
+
+    textarea {
+        resize: none;
+        height: 80px;
+    }
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: $black;
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+        transform: scale(1.2);
+        color: darken($black, 20%);
+    }
+}
+
+.category-selector {
+    select {
+        background-color: $white;
+        color: $black;
+        border: 1px solid #000;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 5px;  
+        width: 100%;
+    }
+
+    input {
+        width: calc(100% - 10px);
+    }
+}
+
+.save-btn,
+.cancel-btn {
+    width: 48%;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;  
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
+.save-btn {
+    margin-right: 10px;
+    background-color: $black;
+    color: $white;
+}
+
+.cancel-btn {
+    background-color: $black;
+    color: $white;
+}
+
+.modal-content::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar,
+.content::-webkit-scrollbar {
+    display: none;
+}

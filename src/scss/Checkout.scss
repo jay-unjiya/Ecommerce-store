@@ -1,0 +1,332 @@
+$primary-color: #A97A5B;
+$white: #ffffff;
+$black: #000000;
+$background-color: rgba($color: #000000, $alpha: 0.4);
+$input-background: rgba(255, 255, 255, 0.1);
+$priceDetailsColor: #050038;
+$pricecolor: green;
+$font-family: 'metropolisregular', sans-serif;
+
+.checkout-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: $background-color;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+  z-index: 1000;
+  font-family: $font-family;
+
+  .checkout-content {
+    background-color: $white;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 448px;
+    position: relative;
+
+    .close-btn {
+      position: absolute;
+      right: 10px;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      background-color: #beb9b9;
+      color: white;
+      border-radius: 30px;
+      padding: 4px;
+    }
+
+    .checkout-header {
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      position: relative;
+      top: -21px;
+      background-color: $white;
+
+      .checkout-logo {
+        width: 50px;
+        height: 34px;
+        margin-right: 1rem;
+      }
+
+      .checkout-steps {
+        display: flex;
+        width: 100%;
+        padding-inline: 32px;
+        gap: 52px;
+
+        li {
+          list-style: none;
+          font-size: 1rem;
+          color: $black;
+
+          &.active {
+            font-weight: bold;
+            color: $primary-color;
+          }
+        }
+      }
+    }
+
+    .order-summary {
+      background-color: $white;
+      padding: 1rem;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+      border-radius: 10px;
+
+      .order-summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        color: $black;
+
+        .order-summary-title {
+          flex-direction: row;
+          display: flex;
+          align-items: center;
+          gap: 5.5px;
+
+          .order-summary-icon1 {
+            font-size: 20px;
+          }
+
+          .order-summary-icon2 {
+            font-size: 13px;
+            position: relative;
+            top: 2px;
+          }
+
+          p {
+            color: $priceDetailsColor ;
+            font-weight: 500;
+          }
+        }
+
+        .FinalPrice {
+          font-weight: 600;
+          font-size: 19px;
+        }
+      }
+
+      .order-summary-content {
+        margin-top: 10px;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+
+
+
+        .product-summary {
+          display: flex;
+
+          margin-bottom: 1rem;
+          width: 100%;
+          // flex: 1;
+
+
+          img {
+            // width: 60px;
+            height: 60px;
+            margin-right: 1rem;
+          }
+
+
+
+          .product-details {
+            width: 100%;
+
+            .prices {
+              display: flex;
+              flex-direction: row;
+
+              del {
+                margin-left: 6px;
+              }
+            }
+
+            p {
+
+              span {
+
+                color: $pricecolor;
+                margin-left: 10px;
+                font-weight: bold;
+                font-size: 1.02em;
+              }
+            }
+
+          }
+
+          hr {
+            width: 100%;
+            border: none;
+            border-top: 1px solid #eee;
+          }
+        }
+
+        .price-details {
+          color: $priceDetailsColor;
+          font-size: 15px;
+          font-weight: 500;
+
+          .FinalPrice {
+            padding-top: 10px;
+            font-weight: 700;
+          }
+
+
+          div {
+            display: flex;
+            justify-content: space-between;
+
+          }
+        }
+      }
+    }
+
+    .checkout-step {
+      display: flex;
+      flex-direction: column;
+      margin-top: 1rem;
+     
+      .form-details
+      {
+        max-height: 230px;
+        overflow-y: auto;
+      }
+
+      input,
+      .checkout-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid $black;
+        border-radius: 5px;
+        background-color: $input-background;
+        color: $black;
+      }
+
+      input::placeholder,
+      .checkout-textarea::placeholder {
+        transition: all 0.3s ease;
+      }
+
+      input:focus::placeholder,
+      .checkout-textarea:focus::placeholder {
+        font-size: 0.80rem;
+        position: relative;
+        top: -8px;
+        left: 1px;
+      }
+      input:focus{
+        text-transform: uppercase;
+
+      }
+
+      div {
+        margin-bottom: 0.75rem;
+
+      }
+
+
+      .city-state {
+        display: flex;
+        gap: 1rem;
+
+        div {
+          width: 100%;
+        }
+
+      }
+
+      textarea {
+        max-height: 49px;
+      }
+
+      p {
+        margin: 0;
+        font-weight: bold;
+      }
+
+      .address-type {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.1rem;
+        background-color: $input-background;
+        margin-bottom: 11px;
+        justify-content: start;
+        
+        
+        label {
+          margin-top: 5px;
+          padding-right: 1.5rem;
+          padding-top: 0.5rem;
+          padding-bottom: 0.5rem;
+          padding-left: 0.5rem;
+          border: 1px solid $black;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: start;
+          gap: 0.3rem;
+          opacity: 0.5;
+
+          &.active {
+            opacity: 1;
+          }
+
+        }
+
+        input[type="radio"] {
+          accent-color: $black;
+        }
+      }
+
+      .button-section {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: 0.75rem;
+        padding-bottom: 18px;
+        background-color: $black;
+        color: $white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+
+        button {
+          margin-right: 7px;
+
+        }
+      }
+    }
+
+  }
+}
+
+.Error {
+  color: red;
+}
+
+.order-summary-content::-webkit-scrollbar {
+  display: none;
+}
+
+.form-details::-webkit-scrollbar {
+  display: none;
+}
+
+.checkout-popup::-webkit-scrollbar {
+  display: none;
+}

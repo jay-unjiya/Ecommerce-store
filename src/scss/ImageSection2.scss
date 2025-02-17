@@ -1,0 +1,41 @@
+.imageSection {
+    display: flex;
+    width: 90%;
+    height: 600px;
+    gap: 20px;
+    margin: 0 auto;
+    margin-bottom: 50px;
+}
+
+.leftImage {
+    width: 50%;
+    height: 100%;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.rightImages {
+    display: flex;
+    width: 50%;
+    height: 100%;
+    gap: 20px;
+
+    .firstCol,
+    .secCol {
+        width: calc(50% - 10px);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+
+        .img {
+            width: 100%;
+            height: 50%;
+            object-fit: cover;
+        }
+    }
+}

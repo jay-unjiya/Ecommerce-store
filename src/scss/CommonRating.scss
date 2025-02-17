@@ -1,0 +1,57 @@
+.common-rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    text-align: center;
+    margin: auto;
+    width: 90%;
+    margin-bottom: 50px;
+
+    p {
+        margin: 0;
+        font-size: 16px;
+        color: #737373;
+    }
+
+    .rating-container {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+
+        .fera-overallRatingBanner-rating-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+            top: 5px;
+            padding-inline: 60px;
+        }
+
+        .fera-overallRatingBanner-rating-number {
+            font-size: 48px;
+            font-weight: 600;
+            color: #141313;
+            margin: 0;
+            margin: auto;
+            top: -24px;
+            position: relative;
+            left: 46px;
+
+        }
+
+        .fera-overallRatingBanner-rating-stars {
+            margin-left: 5.5rem;
+            color: #3cc639;
+            position: relative;
+            top: 7px;
+            left: -137px;
+            font-size: 1.8rem;
+        }
+
+        .fera-overallRatingBanner-leftRibbon,
+        .fera-overallRatingBanner-rightRibbon {
+            fill: #171717;
+        }
+    }
+}

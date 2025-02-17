@@ -1,0 +1,160 @@
+$black: black;
+$white: white;
+$primary-color: #A97A5B;
+$sale-bg-color: red;
+$sale-text-color: $white;
+$icon-bg-color: $white;
+$hover-bg-color: rgba(0, 0, 0, 0.8);
+$product-title-size: 1.1rem;
+$product-title-weight: 500;
+$product-price-size: 1.2rem;
+$product-price-weight: bold;
+$product-delprice-size: 1rem;
+$product-delprice-color: #777;
+$home-collection-btn-bg: $black;
+$home-collection-btn-color: $white;
+$home-collection-btn-hover-bg: #333;
+$grid-gap: 4%;
+$font-family:'Rajdhani', sans-serif;
+
+.home-collection {
+  margin-bottom: 110px;
+  width: 95%;
+  margin: auto;
+
+  .content {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    span {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+  }
+
+  .home-collection-items {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $grid-gap;
+  }
+
+  .home-collection-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    cursor: pointer;
+    height: 100%;
+
+    .sale-tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: $sale-bg-color;
+      color: $sale-text-color;
+      padding: 3px 15px;
+      font-size: 0.9rem;
+      border-top-right-radius: 14px;
+      border-bottom-right-radius: 14px;
+      z-index: 1;
+    }
+
+    .icon-container {
+      position: absolute;
+      top: 10px;
+      right: 50px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+      z-index: 1;
+
+      .icon-link {
+        background-color: $icon-bg-color;
+        padding: 5px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+
+        &:hover {
+          background-color: $hover-bg-color;
+        }
+
+        img {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    &:hover .icon-container,
+    &:hover img {
+      opacity: 1;
+    }
+
+    img {
+      width: 100%;
+      height: 230px; // Sets the same height for all images
+      object-fit: cover; // Ensures the image covers the area without distortion
+      transition: transform 0.3s ease-in-out;
+
+      &:hover {
+        transform: scale(1.08);
+      }
+    }
+
+    .product-info {
+      margin-top: 0.5rem;
+      text-align: left;
+      font-family: $font-family;
+
+      .product-title {
+        font-size: $product-title-size;
+        font-weight: $product-title-weight;
+      }
+
+      .price {
+        margin-right: 6px;
+        font-size: $product-price-size;
+        font-weight: $product-price-weight;
+      }
+
+      .delPrice {
+        font-size: $product-delprice-size;
+        color: $product-delprice-color;
+      }
+
+      .home-collection-btn {
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: $home-collection-btn-bg;
+        color: $home-collection-btn-color;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.3s ease;
+        font-size: 15px;
+        // font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+
+        &:hover {
+          background-color: $home-collection-btn-hover-bg;
+        }
+      }
+    }
+  }
+}
+
+.loader {
+  width: 40px;
+  aspect-ratio: 1;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}

@@ -1,0 +1,78 @@
+.payment-form {
+    width: 100%;
+
+    h2 {
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 24px;
+        color: #333;
+        width: 100%;
+    }
+    .form-container {
+        // margin: 40px auto;
+        padding: 30px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+        transition: all 0.3s ease-in-out;
+        max-height: 230px;
+        overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
+        gap: 2%;
+
+      
+        .field-number{
+            margin-top: 6rem;
+        }
+
+        .field {
+            width: 100%;
+           
+
+            label {
+                display: block;
+                font-weight: bold;
+                color: #333;
+            }
+        }
+
+        .input-element {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fafafa;
+            font-size: 16px;
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+
+            :focus {
+                border-color: #5cb85c;
+                box-shadow: 0 0 5px rgba(92, 184, 92, 0.4);
+            }
+        }
+    }
+
+        .pay-button {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            padding: 0.70rem;
+            padding-bottom: 18px;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            font-size: 19px;
+            position: relative;
+            top: 1rem;
+        }
+}
+
+.form-container::-webkit-scrollbar {
+    display: none;
+}

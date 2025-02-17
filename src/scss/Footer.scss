@@ -1,0 +1,150 @@
+$primary: #A97A5B;
+$fontSize: 14px;
+$fonts: 'Montserrat';
+$color: #ffffff;
+$footerHoverColor: rgb(173, 84, 52);
+
+.footer {
+  background-color: #262626;
+  color: $color;
+  padding-top: 122px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 367px;
+  position: relative;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  .footer-content {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+
+      .footer-logo {
+        position: relative;
+        top: -90px;
+        height: 70px;
+        margin-right: 185px;
+      }
+    }
+
+    .footer-columns {
+      display: flex;
+      justify-content: space-between;
+      width: 60%;
+
+      .footer-column {
+        display: flex;
+        flex-direction: column;
+
+        h3 {
+          font-size: 25px;
+          margin-bottom: 1rem;
+        }
+
+        ul {
+          list-style: none;
+          padding: 0;
+
+          li {
+            margin-bottom: 0.5rem;
+
+            a {
+              font-size: $fontSize;
+              color: $color;
+              text-decoration: none;
+
+              &:hover {
+                color: $footerHoverColor;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .footer-email {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      margin-left: 55px;
+      width: 300px;
+
+      .input-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 1rem;
+
+        input {
+          width: 100%;
+          padding: 0.5rem 2.5rem 0.5rem 0.5rem;
+          background-color: rgba(255, 255, 255, 0.1);
+          border: none;
+          border-radius: 8px;
+          color: $color;
+          height: 52px;
+        }
+
+        .input-icon {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: $fontSize;
+          color: black;
+        }
+        &:hover
+        {
+          color: $primary;
+
+        }
+      }
+
+      .footer-social {
+        display: flex;
+        flex-direction: row;
+        margin-top: 0.5rem;
+
+        .social-icon {
+          margin-right: 20px;
+          font-size: 1.5rem;
+          color: $color;
+          width: 35px;
+          height: 35px;
+
+          &:hover {
+            color: $primary;
+          }
+        }
+
+        .instagram {
+          height: 35px;
+          width: 35px;
+          background-color: #ffffff;
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          .t4s-icon-instagram {
+            height: 17px;
+            width: 17px;
+          }
+
+          &:hover {
+            background-color: $primary;
+          }
+        }
+
+
+      }
+    }
+  }
+}
