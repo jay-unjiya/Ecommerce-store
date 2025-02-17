@@ -20,6 +20,10 @@ app.use('/api',userRoute)
 app.use('/api/orders',orderRoute)
 app.use('/api/cart',cartRoute)
 app.use('/api/payment',stripeRoute)
+app.get('/',(req,res)=>{
+    res.json("hii there")
+    res.end()
+})
 
 
 
