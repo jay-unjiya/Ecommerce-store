@@ -20,11 +20,10 @@ app.use('/api',userRoute)
 app.use('/api/orders',orderRoute)
 app.use('/api/cart',cartRoute)
 app.use('/api/payment',stripeRoute)
-app.get('/',(req,res)=>{
-    res.json("hii there")
-    res.end()
-})
 
+app.get('/api', (req, res) => {
+    res.json("hii there");
+});
 
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
