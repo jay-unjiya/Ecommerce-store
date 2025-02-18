@@ -9,7 +9,7 @@ import ProductPage from './components/ProductPage';
 import ViewCart from './components/viewCart';
 import Signup from './components/Signup';
 import Login from './components/Login';
-import Confirm from './components/Confirm';
+import Confirm from './components/confirm';
 import AdminPanel from './components/adminpannel';
 import Profile from './components/Profile';
 import { CartProvider } from './context/CartProvider'; // Import the provider
