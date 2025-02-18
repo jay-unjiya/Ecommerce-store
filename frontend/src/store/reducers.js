@@ -1,15 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { useCart } from "../context/CartProvider";
-const { BASE_URL } = useCart()
+
 
 export const fetchProducts = createAsyncThunk('products/fetchProduct', async () => {
-    const res = await fetch(`${BASE_URL}/products`);
+    const res = await fetch(`https://ecommerce-store-backend-five.vercel.app/api/products`);
     const data = await res.json();
     return data;
 });
 
 export const fetchSingleProduct = createAsyncThunk('products/fetchSingleProduct', async (id) => {
-    const res = await fetch(`${BASE_URL}/products/${id}`);
+    const res = await fetch(`https://ecommerce-store-backend-five.vercel.app/api/products/${id}`);
     const data = await res.json();
     return data;
 });
