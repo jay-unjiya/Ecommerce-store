@@ -14,11 +14,12 @@ const ProductPage = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [product, setProduct] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loading, setLoading] = useState(true); // New state for loading
   const thumbnailRefs = useRef([]);
   const navigate = useNavigate();
   const { id } = useParams();
-  const { handleAddToCart,BASE_URL } = useCart();
-  
+  const { handleAddToCart, BASE_URL } = useCart();
+
   const productImages = product?.image ? Array(10).fill(product.image) : [];
 
   useEffect(() => {
@@ -33,6 +34,10 @@ const ProductPage = () => {
 
     fetchProduct();
     window.scrollTo(0, 0);
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000); 
   }, [id]);
 
   const decrement = () => {
@@ -79,106 +84,114 @@ const ProductPage = () => {
     }
   }, [currentImageIndex]);
 
-  if (!product) {
-    return <div>Loading...</div>;
-  }
-
-  return (
+    return (
     <>
-      <div className="productPage">
-        <div className="productImages">
-          <button 
-            className="prevButton" 
-            onClick={(e) => { 
-              e.preventDefault(); 
-              handlePrevImage(); 
-            }}
-          >
-            <GrFormPrevious />
-          </button>
-          <img 
-            className="mainImage" 
-            src={productImages[currentImageIndex]} 
-            alt={product.title} 
-          />
-          <button 
-            className="nextButton" 
-            onClick={(e) => { 
-              e.preventDefault(); 
-              handleNextImage(); 
-            }}
-          >
-            <GrNext />
-          </button>
-          <div className="thumbnailImages">
-            {productImages.map((image, index) => (
+      {loading ? (
+        <div className="product-loader"></div>
+      ) : (
+        <>
+          <div className="productPage">
+            <div className="productImages">
+              <button
+                className="prevButton"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePrevImage();
+                }}
+              >
+                <GrFormPrevious />
+              </button>
               <img
-                key={index}
-                src={image}
-                alt={`${product.title} thumbnail ${index + 1}`}
-                ref={(el) => (thumbnailRefs.current[index] = el)}
-                className={index === currentImageIndex ? "active" : "inactive"}
-                onClick={() => setCurrentImageIndex(index)}
+                className="mainImage"
+                src={productImages[currentImageIndex]}
+                alt={product.title}
               />
-            ))}
-          </div>
-        </div>
-        <div className="productDetails">
-          <h2 className="title">{product.title}</h2>
-          <div className="priceSection">
-            <del className="delPrice">Rs. {(product.price * 5).toFixed(2)}</del>
-            <span className="price">Rs. {product.price.toFixed(2)}</span>
-          </div>
-          <p>Inclusive of all taxes Free Shipping.</p>
-          <div className="rating">
-            <span className="stars">★★★★☆</span> (16)
-          </div>
-          <div className='static-text'>
-            <img src={shopify} alt="Shopify icon" className='static-symbol' />
-            <p>88 units sold in last 7 days</p>
-          </div>
-          <div className="offer-box">
-            <div className="offer-box__header">OFFERS</div>
-            <div className="offer-box__content">
-              <div className="offer-box__discount">10% Off</div>
-              <div className="offer-box__code">
-                <div className="offer-box__code-label">Code:</div>
-                <div className="offer-box__code-text">GRAB10</div>
+              <button
+                className="nextButton"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNextImage();
+                }}
+              >
+                <GrNext />
+              </button>
+              <div className="thumbnailImages">
+                {productImages.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`${product.title} thumbnail ${index + 1}`}
+                    ref={(el) => (thumbnailRefs.current[index] = el)}
+                    className={index === currentImageIndex ? "active" : "inactive"}
+                    onClick={() => setCurrentImageIndex(index)}
+                  />
+                ))}
               </div>
             </div>
-            <div className="offer-box__footer">Use code at checkout</div>
-          </div>
-          <p>40 people watching this product currently</p>
-          <div>
-            <p className="color">Color: {product.color}</p>
-            <div className="quantity">
-              <div className="quantityOpt">
-                <button onClick={decrement}><FaMinus /></button>
-                <input
-                  type="text"
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value);
-                    if (!isNaN(val) && val > 0) {
-                      setQuantity(val);
-                    }
-                  }}
-                  value={quantity}
-                />
-                <button onClick={increment}><FaPlus /></button>
+            <div className="productDetails">
+              <h2 className="title">{product.title}</h2>
+              <div className="priceSection">
+                <del className="delPrice">Rs. {(product.price * 5).toFixed(2)}</del>
+                <span className="price">Rs. {product.price.toFixed(2)}</span>
+              </div>
+              <p>Inclusive of all taxes Free Shipping.</p>
+              <div className="rating">
+                <span className="stars">★★★★☆</span> (16)
+              </div>
+              <div className="static-text">
+                <img src={shopify} alt="Shopify icon" className="static-symbol" />
+                <p>88 units sold in last 7 days</p>
+              </div>
+              <div className="offer-box">
+                <div className="offer-box__header">OFFERS</div>
+                <div className="offer-box__content">
+                  <div className="offer-box__discount">10% Off</div>
+                  <div className="offer-box__code">
+                    <div className="offer-box__code-label">Code:</div>
+                    <div className="offer-box__code-text">GRAB10</div>
+                  </div>
+                </div>
+                <div className="offer-box__footer">Use code at checkout</div>
+              </div>
+              <p>40 people watching this product currently</p>
+              <div>
+                <p className="color">Color: {product.color}</p>
+                <div className="quantity">
+                  <div className="quantityOpt">
+                    <button onClick={decrement}>
+                      <FaMinus />
+                    </button>
+                    <input
+                      type="text"
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val) && val > 0) {
+                          setQuantity(val);
+                        }
+                      }}
+                      value={quantity}
+                    />
+                    <button onClick={increment}>
+                      <FaPlus />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="product-btns">
+                <button onClick={handleAddToCartClick}>ADD TO CART</button>
+                <button className="exp" onClick={handleBuyNow}>
+                  BUY NOW
+                </button>
               </div>
             </div>
           </div>
-          <div className="product-btns">
-            <button onClick={handleAddToCartClick}>ADD TO CART</button>
-            <button className="exp" onClick={handleBuyNow}>BUY NOW</button>
-          </div>
-        </div>
-      </div>
-      {showCheckout && (
-        <Checkout 
-          product={{ ...product, quantity }} 
-          onClose={handleCloseCheckout} 
-        />
+          {showCheckout && (
+            <Checkout
+              product={{ ...product, quantity }}
+              onClose={handleCloseCheckout}
+            />
+          )}
+        </>
       )}
     </>
   );
