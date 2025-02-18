@@ -1,0 +1,87 @@
+@keyframes moving-gradient {
+    0% { background-position: -250px 0; }
+    100% { background-position: 250px 0; }
+}
+
+.skeleton-loader {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+
+    tr {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        
+        td {
+            height: 50px;
+            vertical-align: middle;
+            padding: 15px;
+
+            span {
+                display: block;
+                border-radius: 4px;
+            }
+
+            &.td-title {
+                width: 25%;
+                span {
+                    height: 12px;
+                    background: linear-gradient(to right, #eee 20%, #ddd 50%, #eee 80%);
+                    background-size: 500px 100px;
+                    animation: moving-gradient 1s infinite linear forwards;
+                }
+            }
+
+            &.td-image {
+                width: 80px;
+                span {
+                    background-color: rgba(0, 0, 0, 0.15);
+                    width: 50px;
+                    height: 50px;
+                }
+            }
+
+            &.td-price {
+                width: 100px;
+                span {
+                    height: 12px;
+                    background: linear-gradient(to right, #eee 20%, #ddd 50%, #eee 80%);
+                    background-size: 500px 100px;
+                    animation: moving-gradient 1s infinite linear forwards;
+                }
+            }
+
+            &.td-description {
+                width: 30%;
+                span {
+                    height: 12px;
+                    background: linear-gradient(to right, #eee 20%, #ddd 50%, #eee 80%);
+                    background-size: 500px 100px;
+                    animation: moving-gradient 1s infinite linear forwards;
+                }
+            }
+
+            &.td-category {
+                width: 15%;
+                span {
+                    height: 12px;
+                    background: linear-gradient(to right, #eee 20%, #ddd 50%, #eee 80%);
+                    background-size: 500px 100px;
+                    animation: moving-gradient 1s infinite linear forwards;
+                }
+            }
+
+            &.td-actions {
+                width: 150px;
+                span {
+                    background-color: rgba(0, 0, 0, 0.15);
+                    width: 100%;
+                    height: 30px;
+                }
+            }
+        }
+    }
+}

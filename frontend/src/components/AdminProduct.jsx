@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../scss/AdminPanel.scss';
 import { GiSplitCross } from "react-icons/gi";
-import {useCart} from '../context/CartProvider'
-
+import { useCart } from '../context/CartProvider'
+import TableLoader from '../components/TableLoader';
 const AdminProduct = ({ category }) => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [newCategory, setNewCategory] = useState(false);
+    const [isLoading, setIsLoading] = useState(true)
     const [showModal, setShowModal] = useState(false);
     const [currentProduct, setCurrentProduct] = useState({
         title: '', image: '', price: '', description: '', brand: '', model: '', color: '', category: ''
@@ -18,6 +19,7 @@ const AdminProduct = ({ category }) => {
     const fetchCategories = async () => {
         try {
             const response = await axios.get(`${BASE_URL}/categories`);
+            console.log("1")
             setCategories(response.data);
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -30,6 +32,7 @@ const AdminProduct = ({ category }) => {
 
     useEffect(() => {
         const fetchProducts = async () => {
+            setIsLoading(true);
             try {
                 let url = `${BASE_URL}/product`;
                 if (category) {
@@ -37,8 +40,11 @@ const AdminProduct = ({ category }) => {
                 }
                 const response = await axios.get(url);
                 setProducts(response.data);
+                await new Promise(resolve => setTimeout(resolve, 1000));
             } catch (error) {
                 console.error('Error fetching products:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -144,35 +150,39 @@ const AdminProduct = ({ category }) => {
             <div className='top-section'>
                 <button onClick={handleAddProduct} className="add-btn">Add Product</button>
             </div>
-            <table className="admin-table">
-                <thead>
-                    <tr>
-                       
-                        <th>Title</th>
-                        <th>Image</th>
-                        <th>Price</th>
-                        <th>Description</th>
-                        <th>Category</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {products.map((product, index) => (
-                        <tr key={index}>
-                            
-                            <td>{(product.title).substring(0, 50)}</td>
-                            <td><img src={product.image} alt={product.title} className="product-image" /></td>
-                            <td>{(product.price).toFixed(2)}</td>
-                            <td>{(product.description).substring(0, 50)}</td>
-                            <td>{product.category}</td>
-                            <td className='action-btn'>
-                                <button onClick={() => handleEditProduct(product)} className="update-btn">Update</button>
-                                <button onClick={() => handleDeleteProduct(product._id)} className="delete-btn">Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <div className="table-loader-container">
+                {isLoading ? (
+                     <TableLoader rowsCount={8} />
+                ) : (
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Image</th>
+                                <th>Price</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {products.map((product, index) => (
+                                <tr key={index}>
+                                    <td>{(product.title).substring(0, 50)}</td>
+                                    <td><img src={product.image} alt={product.title} className="product-image" /></td>
+                                    <td>{(product.price).toFixed(2)}</td>
+                                    <td>{(product.description).substring(0, 50)}</td>
+                                    <td>{product.category}</td>
+                                    <td className='action-btn'>
+                                        <button onClick={() => handleEditProduct(product)} className="update-btn">Update</button>
+                                        <button onClick={() => handleDeleteProduct(product._id)} className="delete-btn">Delete</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
 
 
             {showModal && (
