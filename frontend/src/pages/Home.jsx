@@ -1,7 +1,7 @@
 import React from 'react'
 import Carousel from '../components/Carousel'
 import ImageSection from '../components/ImageSection'
-import CommonRating from '../components/commonRating'
+import CommonRating from '../components/CommonRating'
 import HomeCollection from '../components/HomeCollection'
 import About from '../components/about'
 import { useState,useEffect } from 'react'
