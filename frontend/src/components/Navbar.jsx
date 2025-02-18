@@ -98,7 +98,7 @@ const Navbar = () => {
         <Link to='/'>Home</Link>
         {!isAdmin && <Link to='/Collection'>Collection</Link>}
         <Link to='/'>Contact</Link>
-      </div>
+      </div> 
       <div className="navbar__icons">
         <FaRegUser className="icon" onClick={handleUserIconClick} />
         {!isAdmin && <IoCartOutline className="icon" onClick={() => openCart()} />}
