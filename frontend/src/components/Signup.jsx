@@ -1,33 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect } from "react";
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import logo from '../assets/logo2.png';
-import Footer from './Footer';
 import { ToastContainer, toast } from 'react-toastify';
 import '../scss/Signup.scss';
 import { useCart } from "../context/CartProvider";
 
 const Signup = () => {
+    const [loading, setLoading] = useState(false);  // Add loading state
     const navigate = useNavigate();
-    const { BASE_URL } = useCart()
-
+    const { BASE_URL } = useCart();
 
     const saveCartToDatabase = async (userId) => {
         try {
             const savedProducts = localStorage.getItem('products');
-            console.log(savedProducts)
             const productIds = savedProducts ? JSON.parse(savedProducts) : [];
             const items = productIds.map(({ productId, quantity }) => ({ productId, quantity }));
-            console.log(items)
 
-            await axios.post(`${BASE_URL}/cart/save`, {
-                userId,
-                items
-            });
-
+            await axios.post(`${BASE_URL}/cart/save`, { userId, items });
         } catch (error) {
             console.error('Error saving cart to database:', error);
         }
@@ -36,7 +28,6 @@ const Signup = () => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         const adminToken = localStorage.getItem('admin-token');
-
         if (token || adminToken) {
             const endpoint = token ? `${BASE_URL}/check/verifyAccess` : `${BASE_URL}/check/verifyAdminAccess`;
             const authToken = token || adminToken;
@@ -44,13 +35,11 @@ const Signup = () => {
             axios.post(endpoint, {}, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                }
+                    'Authorization': `Bearer ${authToken}`,
+                },
             }).then(() => {
                 toast("You are already logged in");
-                setTimeout(() => {
-                    navigate('/');
-                }, 2000);
+                setTimeout(() => navigate('/'), 2000);
             }).catch((err) => {
                 console.error('Token verification failed:', err);
                 localStorage.removeItem('token');
@@ -58,7 +47,6 @@ const Signup = () => {
             });
         }
     }, [navigate]);
-
 
     const validationSchema = Yup.object({
         firstName: Yup.string().required('First Name is required'),
@@ -76,6 +64,7 @@ const Signup = () => {
         },
         validationSchema: validationSchema,
         onSubmit: async (values) => {
+            setLoading(true); // Show loading spinner
             try {
                 const response = await axios.post(`${BASE_URL}/auth/signup`, {
                     firstName: values.firstName,
@@ -87,12 +76,13 @@ const Signup = () => {
                     localStorage.setItem('token', response.data.data.token);
                     const userId = response.data.data.id;
                     await saveCartToDatabase(userId);
-
                     navigate('/');
                 }
             } catch (err) {
                 console.error('Signup failed:', err);
                 alert('Signup failed. Please try again.');
+            } finally {
+                setLoading(false); // Hide loading spinner
             }
         },
     });
@@ -147,12 +137,20 @@ const Signup = () => {
                     />
                     {formik.touched.password && formik.errors.password && <div className='Error'>{formik.errors.password}</div>}
 
-                    <button className="submit-button" type="submit">Sign Up</button>
-                    <button type="button" onClick={() => navigate('/login')}>Already have an account? <span>Login</span> </button>
+                    <button className="submit-button" type="submit">
+                        {loading ? (
+                            <span className="button-loader"></span>  // Display loader
+                        ) : (
+                            'Sign Up'  // Button text when not loading
+                        )}
+                    </button>
+                    <button type="button" onClick={() => navigate('/login')}>
+                        Already have an account? <span>Login</span>
+                    </button>
                 </form>
             </div>
         </>
     );
-}
+};
 
 export default Signup;

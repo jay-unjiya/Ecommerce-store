@@ -7,17 +7,16 @@ import logo from '../assets/logo2.png';
 import { ToastContainer, toast } from 'react-toastify';
 import Footer from './Footer';
 import '../scss/Signup.scss';
-import { useCart } from '../context/CartProvider'; // Add this import
-const Login = () => {
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
-    const { syncCartAfterLogin, BASE_URL } = useCart(); // Add this
-    
+import { useCart } from '../context/CartProvider';
 
+const Login = () => {
+    const [loading, setLoading] = useState(false); // Add loading state
+    const navigate = useNavigate();
+    const { syncCartAfterLogin, BASE_URL } = useCart();
 
     const handleLogin = async () => {
         try {
-            setLoading(true);
+            setLoading(true); // Show loading spinner
             const token = localStorage.getItem('token');
             if (!token) return;
 
@@ -33,7 +32,7 @@ const Login = () => {
         } catch (error) {
             console.error('Login failed:', error);
         } finally {
-            setLoading(false);
+            setLoading(false); // Hide loading spinner
         }
     };
 
@@ -48,18 +47,15 @@ const Login = () => {
             axios.post(endpoint, {}, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
+                    'Authorization': `Bearer ${authToken}`,
                 }
             }).then(() => {
                 toast("You are already logged in");
-                setTimeout(() => {
-                    navigate('/');
-                }, 2000);
+                setTimeout(() => navigate('/'), 2000);
             }).catch((err) => {
                 console.error('Token verification failed:', err);
                 localStorage.removeItem('token');
                 localStorage.removeItem('admin-token');
-
             });
         }
     }, [navigate]);
@@ -76,6 +72,7 @@ const Login = () => {
         },
         validationSchema: validationSchema,
         onSubmit: async (values) => {
+            setLoading(true); // Show loading spinner
             try {
                 const endpoint = `${BASE_URL}/auth/login`;
                 const response = await axios.post(endpoint, {
@@ -87,7 +84,7 @@ const Login = () => {
                     const isAdminRole = response.data.role === "admin";
                     const tokenKey = isAdminRole ? 'admin-token' : 'token';
                     localStorage.setItem(tokenKey, response.data.data.token);
-                    handleLogin()
+                    handleLogin();
                     navigate(isAdminRole ? '/admin' : '/');
                 } else {
                     alert('Login failed. Please try again.');
@@ -95,6 +92,8 @@ const Login = () => {
             } catch (err) {
                 console.error('Login failed:', err);
                 alert('Login failed. Please try again.');
+            } finally {
+                setLoading(false); // Hide loading spinner
             }
         },
     });
@@ -128,12 +127,20 @@ const Login = () => {
                     />
                     {formik.touched.password && formik.errors.password && <div className='Error'>{formik.errors.password}</div>}
 
-                    <button className="submit-button" type="submit">Login</button>
-                    <button type="button" onClick={() => navigate('/signup')}>New to the website? <span>SignUp</span></button>
+                    <button className="submit-button" type="submit">
+                        {loading ? (
+                            <span className="button-loader"></span>  // Display loader
+                        ) : (
+                            'Login'  // Button text when not loading
+                        )}
+                    </button>
+                    <button type="button" onClick={() => navigate('/signup')}>
+                        New to the website? <span>SignUp</span>
+                    </button>
                 </form>
             </div>
         </>
     );
-}
+};
 
 export default Login;
