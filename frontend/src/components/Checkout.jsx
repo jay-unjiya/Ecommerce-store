@@ -99,10 +99,10 @@ const Checkout = ({ product, onClose }) => {
             userEmail: user.email,
             userName: `${user.firstName} ${user.lastName}`,
             totalPrice: totalPrice,
-            cartItems: JSON.stringify(cartItems), // Convert cart items to a string
+            cartItems: JSON.stringify(cartItems), 
           };  
 
-          await axios.post(`${BASE_URL}/mail/send-confirmation-email`, emailData);
+          await axios.post(`${BASE_URL}/send-confirmation-email`, emailData); 
 
           navigate('/confirm');
         } else {
