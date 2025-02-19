@@ -18,13 +18,7 @@ $sidebarColor: #fbfbff;
         margin-bottom: 20px;
         font-weight: bold;
       }
-      .content {
-        flex-grow: 1;
-        padding: 20px;
-        min-height: 100vh;
-        overflow-y: auto;
-        min-width: 83%;
-    }
+     
 }
 .order-history {
     
@@ -56,6 +50,14 @@ $sidebarColor: #fbfbff;
       }
   }
   
+}
+.admin-content {
+    flex-grow: 1;
+    padding: 20px;
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    min-width: 83%;
 }
   
 
@@ -345,6 +347,6 @@ $sidebarColor: #fbfbff;
 
 .modal-content::-webkit-scrollbar,
 .sidebar::-webkit-scrollbar,
-.content::-webkit-scrollbar {
+.admin-content::-webkit-scrollbar {
     display: none;
 }

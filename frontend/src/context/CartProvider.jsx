@@ -10,13 +10,14 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loadingCartProducts, setLoadingCartProducts] = useState({});
+  const [preventSave, setPreventSave] = useState(false); // Flag to prevent auto-saving
 
   const navigate = useNavigate();
   const location = useLocation();
   const BASE_URL = "https://ecommerce-store-backend-five.vercel.app/api";
   // const BASE_URL = "https://localhost:5000/api";
 
-  const fetchCartProducts = async () => {
+  const fetchCartProducts = async (forceRefresh = false) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -30,12 +31,7 @@ export const CartProvider = ({ children }) => {
           const userId = res.data.id;
           const response = await fetch(`${BASE_URL}/cart/${userId}`);
           const data = await response.json();
-          if (data.success) {
-            if (!data.cart || data.cart.length === 0) {
-              setProducts([]);
-              return;
-            }
-
+          if (data.success && data.cart && data.cart.length > 0) {
             const productDetails = await Promise.all(
               data.cart.map(async ({ productId, quantity }) => {
                 const res = await fetch(`${BASE_URL}/products/${productId}`);
@@ -79,7 +75,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-
   const checkAdminLogin = () => {
     const adminToken = localStorage.getItem('admin-token');
     if (adminToken) {
@@ -102,24 +97,25 @@ export const CartProvider = ({ children }) => {
     fetchCartProducts();
   }, [location.pathname]);
 
-  const saveCartToDatabase = async (product) => {
+  const saveCartToDatabase = async (products) => {
     try {
-      if (localStorage.getItem('products')) {
+      // If preventSave flag is set or products array is empty, don't save
+      if (preventSave || !products || products.length === 0) {
+        return;
+      }
 
-        console.log(product)
-        const token = localStorage.getItem('token');
-        if (token) {
-          const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+      const token = localStorage.getItem('token');
+      if (token) {
+        const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.data.success) {
+          const userId = res.data.id;
+          await axios.post(`${BASE_URL}/cart/save`, {
+            userId,
+            items: products.map(product => ({ productId: product._id, quantity: product.quantity }))
           });
-
-          if (res.data.success) {
-            const userId = res.data.id;
-            await axios.post(`${BASE_URL}/cart/save`, {
-              userId,
-              items: product.map(product => ({ productId: product._id, quantity: product.quantity }))
-            });
-          }
         }
       }
     } catch (error) {
@@ -127,10 +123,8 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-
   const handleCartUpdate = async ({ item, quantity, openCart }) => {
     try {
-      // Set loading state for this specific product
       setLoadingCartProducts(prev => ({ ...prev, [item._id]: true }));
 
       const savedProducts = localStorage.getItem('products');
@@ -148,7 +142,12 @@ export const CartProvider = ({ children }) => {
         updatedProducts = [...currentProducts, { productId: item._id, quantity }];
       }
 
-      localStorage.setItem('products', JSON.stringify(updatedProducts));
+      // Don't save empty arrays to localStorage
+      if (updatedProducts.length > 0) {
+        localStorage.setItem('products', JSON.stringify(updatedProducts));
+      } else {
+        localStorage.removeItem('products');
+      }
 
       const newProduct = { ...item, quantity };
       setProducts(prevProducts => {
@@ -184,24 +183,24 @@ export const CartProvider = ({ children }) => {
               }))
             });
           } else {
+            // If cart is empty, clear it from the database
             await axios.delete(`${BASE_URL}/cart/clear`, { data: { userId } });
           }
         }
       }
 
-      if (openCart) openCart();
+      if (openCart && typeof openCart === 'function') {
+        openCart();
+      }
     } catch (error) {
       console.error('Error handling cart:', error);
     } finally {
-      // Clear loading state for this product
       setLoadingCartProducts(prev => ({ ...prev, [item._id]: false }));
     }
   };
 
-
   const handleAddToCart = async (productId, quantity, openCart) => {
     try {
-      // Set loading state for this specific product
       setLoadingCartProducts(prev => ({ ...prev, [productId]: true }));
 
       const productResponse = await fetch(`${BASE_URL}/products/${productId}`);
@@ -236,7 +235,10 @@ export const CartProvider = ({ children }) => {
         }
         return [...prevProducts, { ...productData, quantity }];
       });
-      if (openCart) openCart();
+      
+      if (openCart && typeof openCart === 'function') {
+        openCart();
+      }
 
       const token = localStorage.getItem('token');
       if (token) {
@@ -261,73 +263,178 @@ export const CartProvider = ({ children }) => {
     } catch (error) {
       console.error('Error handling cart:', error);
     } finally {
-      // Clear loading state for this product
       setLoadingCartProducts(prev => ({ ...prev, [productId]: false }));
     }
   };
 
   const syncCartAfterLogin = async (userId) => {
     try {
+      // Get local cart from localStorage
       const localCart = JSON.parse(localStorage.getItem('products')) || [];
-
+      
+      // Skip syncing if there's nothing in the local cart
+      if (localCart.length === 0) {
+        await fetchCartProducts();
+        return;
+      }
+      
+      // Fetch the database cart for the logged-in user
       const dbCartRes = await axios.get(`${BASE_URL}/cart/${userId}`);
       let dbCart = [];
-
-      if (dbCartRes.data.success) {
+      
+      if (dbCartRes.data.success && dbCartRes.data.cart) {
         dbCart = dbCartRes.data.cart;
       }
-
+      
+      // Merge the carts, handling duplicates by adding quantities
       const cartMap = new Map();
-      [...localCart, ...dbCart].forEach(({ productId, quantity }) => {
-        cartMap.set(productId, (cartMap.get(productId) || 0) + quantity);
+      
+      // Add all items from both carts to the Map
+      [...localCart, ...dbCart].forEach(item => {
+        const productId = item.productId;
+        const currentQuantity = cartMap.get(productId) || 0;
+        cartMap.set(productId, currentQuantity + item.quantity);
       });
-
+      
+      // Convert the Map back to an array
       const mergedCart = Array.from(cartMap, ([productId, quantity]) => ({
         productId,
         quantity
       }));
-
-      await axios.post(`${BASE_URL}/cart/save`, {
-        userId,
-        items: mergedCart
-      });
-
-      localStorage.setItem('products', JSON.stringify(mergedCart));
-
-      await fetchCartProducts(true);
+      
+      // Only save if there are items in the merged cart
+      if (mergedCart.length > 0) {
+        // Save the merged cart to the database
+        await axios.post(`${BASE_URL}/cart/save`, {
+          userId,
+          items: mergedCart
+        });
+        
+        // Update localStorage with the merged cart
+        localStorage.setItem('products', JSON.stringify(mergedCart));
+      } else {
+        // If merged cart is empty, clear from database and localStorage
+        await axios.delete(`${BASE_URL}/cart/clear`, { data: { userId } });
+        localStorage.removeItem('products');
+      }
+      
+      // Refresh the cart display
+      await fetchCartProducts();
     } catch (error) {
       console.error('Error syncing cart after login:', error);
     }
   };
-  const manageCartSignup = async () => {
-    const localCart = JSON.parse(localStorage.getItem('products')) || [];
-    await axios.post(`${BASE_URL}/cart/save`, {
-      userId,
-      items: mergedCart
-    });
-  }
 
-  const handleRemove = (id) => {
-    const updatedProducts = products.filter((product) => product._id !== id);
-    setProducts(updatedProducts);
-    localStorage.setItem('products', JSON.stringify(updatedProducts.map(({ _id, quantity }) => ({ productId: _id, quantity }))));
+  const handleRemove = async (id) => {
+    try {
+      // Set prevent save flag to avoid automatic save by the useEffect
+      setPreventSave(true);
+      
+      const updatedProducts = products.filter((product) => product._id !== id);
+      setProducts(updatedProducts);
+      
+      if (updatedProducts.length > 0) {
+        const updatedLocalCart = updatedProducts.map(({ _id, quantity }) => ({ 
+          productId: _id, 
+          quantity 
+        }));
+        
+        localStorage.setItem('products', JSON.stringify(updatedLocalCart));
+        
+        // Also update database if user is logged in
+        const token = localStorage.getItem('token');
+        if (token) {
+          const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (res.data.success) {
+            const userId = res.data.id;
+            await axios.post(`${BASE_URL}/cart/save`, {
+              userId,
+              items: updatedLocalCart
+            });
+          }
+        }
+      } else {
+        // If cart is now empty, clear it completely
+        localStorage.removeItem('products');
+        
+        // Clear from database if logged in
+        const token = localStorage.getItem('token');
+        if (token) {
+          const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (res.data.success) {
+            const userId = res.data.id;
+            await axios.delete(`${BASE_URL}/cart/clear`, { data: { userId } });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error removing item from cart:', error);
+    } finally {
+      // Reset prevent save flag after operation completes
+      setTimeout(() => setPreventSave(false), 100);
+    }
   };
 
-  const handleQuantityChange = (id, newQuantity) => {
+  const handleQuantityChange = async (id, newQuantity) => {
     if (newQuantity < 1) return handleRemove(id);
 
-    const updatedProducts = products.map(product =>
-      product._id === id ? { ...product, quantity: newQuantity } : product
-    );
-    setProducts(updatedProducts);
-    localStorage.setItem('products', JSON.stringify(updatedProducts.map(({ _id, quantity }) => ({ productId: _id, quantity }))));
+    try {
+      // Set prevent save flag to avoid automatic save by the useEffect
+      setPreventSave(true);
+      
+      const updatedProducts = products.map(product =>
+        product._id === id ? { ...product, quantity: newQuantity } : product
+      );
+      
+      setProducts(updatedProducts);
+      
+      const updatedLocalCart = updatedProducts.map(({ _id, quantity }) => ({ 
+        productId: _id, 
+        quantity 
+      }));
+      
+      localStorage.setItem('products', JSON.stringify(updatedLocalCart));
+      
+      // Also update database if user is logged in
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (res.data.success) {
+            const userId = res.data.id;
+            await axios.post(`${BASE_URL}/cart/save`, {
+              userId,
+              items: updatedLocalCart
+            });
+          }
+        } catch (error) {
+          console.error('Error updating cart in database after quantity change:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error changing quantity:', error);
+    } finally {
+      // Reset prevent save flag after operation completes
+      setTimeout(() => setPreventSave(false), 100);
+    }
   };
 
   const calculateSubtotal = () => products.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2);
 
   const handleSubmitCart = (closeNav) => {
     if (checkbox) {
-      closeNav()
+      if (closeNav && typeof closeNav === 'function') {
+        closeNav();
+      }
       navigate('/viewcart');
     } else {
       alert("Please agree to the terms and conditions to proceed.");
@@ -336,29 +443,50 @@ export const CartProvider = ({ children }) => {
 
   const removeCart = async (userId) => {
     try {
+      // Set prevent save flag to avoid automatic save by the useEffect
+      setPreventSave(true);
+      
       // Clear local state first
       localStorage.removeItem('products');
       setProducts([]);
 
       if (userId) {
-        await axios.delete(`${BASE_URL}/cart/clear`, { data: { id: userId } });
+        await axios.delete(`${BASE_URL}/cart/clear`, { data: { userId } });
       }
 
       await fetchCartProducts();
     } catch (error) {
       console.error('Error removing cart:', error);
+    } finally {
+      // Reset prevent save flag after operation completes
+      setTimeout(() => setPreventSave(false), 100);
     }
   };
 
-
   useEffect(() => {
-    saveCartToDatabase(products);
-  }, [products]);
+    if (!preventSave && products.length > 0) {
+      saveCartToDatabase(products);
+    }
+  }, [products, preventSave]);
 
   return (
     <CartContext.Provider value={{
-      products, loading, checkbox, setCheckbox, handleAddToCart, handleRemove, syncCartAfterLogin, removeCart,
-      handleQuantityChange, calculateSubtotal, handleSubmitCart, handleCartUpdate, isAdmin, setIsAdmin, BASE_URL,loadingCartProducts
+      products, 
+      loading, 
+      checkbox, 
+      setCheckbox, 
+      handleAddToCart, 
+      handleRemove, 
+      syncCartAfterLogin, 
+      removeCart,
+      handleQuantityChange, 
+      calculateSubtotal, 
+      handleSubmitCart, 
+      handleCartUpdate, 
+      isAdmin, 
+      setIsAdmin, 
+      BASE_URL,
+      loadingCartProducts
     }}>
       {children}
     </CartContext.Provider>

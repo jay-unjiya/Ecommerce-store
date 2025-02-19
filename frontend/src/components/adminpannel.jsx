@@ -128,7 +128,7 @@ const AdminPanel = () => {
                 <button className="sidebar-btn" onClick={() => handleLogout()}>Logout</button>
             </div>
 
-            <div className="content">
+            <div className="admin-content">
                 {section === 'overview' && (
                     <div className="cards">
                         <div className="card">
