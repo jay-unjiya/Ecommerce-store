@@ -5,27 +5,36 @@ import 'jspdf-autotable';
 import '../scss/AdminPanel.scss';
 import { RiDownloadCloud2Line } from "react-icons/ri";
 import { useCart } from '../context/CartProvider';
+import TableLoader from '../components/TableLoader';
 
 const OrderHistory = ({ userId, user }) => {
   const [orders, setOrders] = useState([]);
-  const { BASE_URL } = useCart()
-
+  const { BASE_URL } = useCart();
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
+        setLoading(true); // Set loading to true when fetching orders
         const response = await axios.get(`${BASE_URL}/orders/user/${userId}`);
         console.log(response.data);
         setOrders(response.data.orders || []); // Ensure orders is an array
+        
+        // Set loading to false after a 1 second delay
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
       } catch (error) {
         console.error('Error fetching orders:', error);
         setOrders([]); // Fallback to empty array on error
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
       }
     };
 
     fetchOrders();
-  }, []);
-
+  }, [userId, BASE_URL]);
 
   const truncateText = (text, length) => {
     if (text.length > length) {
@@ -73,6 +82,11 @@ const OrderHistory = ({ userId, user }) => {
     doc.text(`Total: $${totalPrice}`, 14, doc.autoTable.previous.finalY + 10);
     doc.save(`invoice_${order._id}.pdf`);
   };
+
+  // Show table loader while loading
+  if (loading) {
+    return <TableLoader />;
+  }
 
   return (
     <div className="order-history">

@@ -18,6 +18,13 @@ $sidebarColor: #fbfbff;
         margin-bottom: 20px;
         font-weight: bold;
       }
+      .content {
+        flex-grow: 1;
+        padding: 20px;
+        min-height: 100vh;
+        overflow-y: auto;
+        min-width: 83%;
+    }
 }
 .order-history {
     
@@ -118,13 +125,7 @@ $sidebarColor: #fbfbff;
     }
 }
 
-.content {
-    flex-grow: 1;
-    padding: 20px;
-    max-height: 100vh;
-    overflow-y: auto;
-    min-width: 83%;
-}
+
 
 .cards {
     display: flex;

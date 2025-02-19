@@ -11,7 +11,7 @@ import { openCart } from './Navbar';
 import { useCart } from '../context/CartProvider';
 
 const Collection = () => {
-  const { handleCartUpdate } = useCart();
+  const { handleCartUpdate, loadingCartProducts } = useCart();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const data = useSelector(state => state.products.products);
@@ -52,9 +52,16 @@ const Collection = () => {
                       <span className="price">Rs. {item.price.toFixed(2)}</span>
                       <del className="delPrice"> Rs. {(item.price * 5).toFixed(2)}</del>
                     </p>
-                    <button className="collection-btn"
-                      onClick={() => handleCartUpdate({ item, quantity: 1, openCart })}>
-                      Add To Cart
+                    <button 
+                      className="collection-btn"
+                      onClick={() => handleCartUpdate({ item, quantity: 1, openCart })}
+                      disabled={loadingCartProducts[item._id]}
+                    >
+                      {loadingCartProducts[item._id] ? (
+                        <span className="button-loader"></span>
+                      ) : (
+                        "Add To Cart"
+                      )}
                     </button>
                   </div>
                 </div>

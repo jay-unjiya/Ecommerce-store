@@ -10,7 +10,7 @@ import { openCart } from './Navbar';
 import { useCart } from '../context/CartProvider';
 
 const HomeCollection = () => {
-  const {handleCartUpdate ,isAdmin} = useCart();
+  const { handleCartUpdate, isAdmin, loadingCartProducts } = useCart();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const data = useSelector(state => state.products.products);
@@ -27,7 +27,7 @@ const HomeCollection = () => {
         <span>Explore Your Style</span>
       </div>
       <div className="home-collection-items">
-        { !isAdmin && limitedData.map((item, index) => (
+        {!isAdmin && limitedData.map((item, index) => (
           <div key={index} className="home-collection-card">
             <div className="sale-tag">Sale</div>
             <div className="icon-container">
@@ -44,9 +44,16 @@ const HomeCollection = () => {
                 <span className="price">Rs. {item.price.toFixed(2)}</span>
                 <del className="delPrice"> Rs. {(item.price * 5).toFixed(2)}</del>
               </p>
-              <button className="home-collection-btn" 
-                onClick={() => handleCartUpdate({ item, quantity: 1, openCart })}>
-                Add To Cart
+              <button 
+                className="home-collection-btn" 
+                onClick={() => handleCartUpdate({ item, quantity: 1, openCart })}
+                disabled={loadingCartProducts[item._id]}
+              >
+                {loadingCartProducts[item._id] ? (
+                  <span className="button-loader"></span>
+                ) : (
+                  "Add To Cart"
+                )}
               </button>
             </div>
           </div>

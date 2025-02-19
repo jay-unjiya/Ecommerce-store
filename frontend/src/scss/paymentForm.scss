@@ -93,3 +93,20 @@
         display: none;
     }
 }
+// Add these styles to your paymentForm.scss file
+.input-error {
+  border: 1px solid #fa755a !important;
+}
+
+.error-message {
+  color: #fa755a;
+  font-size: 16px;
+  margin-top: 4px;
+}
+
+.form-error {
+  color: #fa755a;
+  font-size: 14px;
+  margin: 10px 0;
+  text-align: center;
+}

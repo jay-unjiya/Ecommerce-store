@@ -7,14 +7,16 @@ import orderIcon from '../assets/ordericon.png';
 import CountUp from 'react-countup';
 import OrderHistory from './OrderHistory';
 import { useCart } from '../context/CartProvider';
-const Profile = () => {
+import TableLoader from '../components/TableLoader';
 
+const Profile = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [section, setSection] = useState('overview');
     const [orderCount, setOrderCount] = useState(0);
     const [user, setUser] = useState(null);
-    const { BASE_URL } = useCart()
+    const { BASE_URL } = useCart();
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
         if (!id) {
@@ -32,52 +34,63 @@ const Profile = () => {
                         axios.post(`${BASE_URL}/profile`, { id })
                             .then(response => {
                                 setUser(response.data.user);
+                                // Set loading to false after a 1 second delay
+                                setTimeout(() => {
+                                    setLoading(false);
+                                }, 1000);
                             })
                             .catch(error => {
                                 console.log(error);
+                                setLoading(false);
                                 navigate('/login');
                             });
                     }
                 }).catch((err) => {
                     localStorage.removeItem('token');
                     console.log(err);
+                    setLoading(false);
                     navigate('/login');
                 });
-
             } else {
+                setLoading(false);
                 navigate('/login');
             }
         }
-    }, [id, navigate]);
+    }, [id, navigate, BASE_URL]);
 
     const fetchDetails = async () => {
         try {
-            console.log("hii")
             const response = await axios.get(`${BASE_URL}/orders/orderDetails/${id}`);
-
             setOrderCount(response.data);
-
         } catch (error) {
             console.error('Error fetching details:', error);
         }
     };
 
     useEffect(() => {
-        fetchDetails()
-    }, [id, navigate]);
-
-    if (!user) {
-        return null;
-    }
+        if (id) {
+            fetchDetails();
+        }
+    }, [id, BASE_URL]);
 
     const handleSectionClick = (selectedSection) => {
         setSection(selectedSection);
-
     };
+
     const handleLogout = () => {
         localStorage.clear();
         navigate('/login');
     };
+
+    // Show TableLoader while loading
+    if (loading) {
+        return <TableLoader />;
+    }
+
+    // Show nothing if user data is not available yet
+    if (!user) {
+        return null;
+    }
 
     return (
         <div className="admin-panel">
@@ -106,7 +119,7 @@ const Profile = () => {
                 {section === 'orders' && <OrderHistory userId={id} user={user} />}
             </div>
         </div>
-    )
+    );
 };
 
 export default Profile;

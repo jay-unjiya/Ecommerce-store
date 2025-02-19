@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import { RiDeleteBinLine } from 'react-icons/ri';
@@ -24,6 +24,9 @@ const ViewCart = () => {
   const handleCloseCheckout = () => {
     setShowCheckout(false);
   };
+  useEffect(()=>{
+    window.scrollTo(0,0)
+  },[])
 
   return (
     <>

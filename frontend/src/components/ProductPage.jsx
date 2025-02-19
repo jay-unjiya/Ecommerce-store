@@ -14,11 +14,11 @@ const ProductPage = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [product, setProduct] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [loading, setLoading] = useState(true); // New state for loading
+  const [loading, setLoading] = useState(true);
   const thumbnailRefs = useRef([]);
   const navigate = useNavigate();
   const { id } = useParams();
-  const { handleAddToCart, BASE_URL } = useCart();
+  const { handleAddToCart, BASE_URL, loadingCartProducts } = useCart();
 
   const productImages = product?.image ? Array(10).fill(product.image) : [];
 
@@ -37,7 +37,7 @@ const ProductPage = () => {
 
     setTimeout(() => {
       setLoading(false);
-    }, 1000); 
+    }, 1000);
   }, [id]);
 
   const decrement = () => {
@@ -84,7 +84,7 @@ const ProductPage = () => {
     }
   }, [currentImageIndex]);
 
-    return (
+  return (
     <>
       {loading ? (
         <div className="product-loader"></div>
@@ -178,7 +178,16 @@ const ProductPage = () => {
                 </div>
               </div>
               <div className="product-btns">
-                <button onClick={handleAddToCartClick}>ADD TO CART</button>
+                <button 
+                  onClick={handleAddToCartClick}
+                  disabled={loadingCartProducts[id]}
+                >
+                  {loadingCartProducts[id] ? (
+                    <span className="button-loader"></span>
+                  ) : (
+                    "ADD TO CART"
+                  )}
+                </button>
                 <button className="exp" onClick={handleBuyNow}>
                   BUY NOW
                 </button>

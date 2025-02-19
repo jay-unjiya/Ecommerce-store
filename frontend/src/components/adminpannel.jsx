@@ -11,25 +11,27 @@ import productIcon from '../assets/producticon.png';
 import orderIcon from '../assets/ordericon.png';
 import CountUp from 'react-countup';
 import { useCart } from '../context/CartProvider';
+import TableLoader from '../components/TableLoader';
+
 
 const AdminPanel = () => {
     const navigate = useNavigate();
-      const { BASE_URL } = useCart()
-
-    const {isAdmin, setIsAdmin} = useCart();
+    const { BASE_URL } = useCart();
+    const { isAdmin, setIsAdmin } = useCart();
     const [section, setSection] = useState('overview');
     const [userCount, setUserCount] = useState(0);
     const [productCount, setProductCount] = useState(0);
     const [orderCount, setOrderCount] = useState(0);
-
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
         const token = localStorage.getItem('admin-token');
         if (!token) {
             navigate('/login');
         } else {
+            setLoading(true); // Set loading to true when verifying admin access
             axios.post(`${BASE_URL}/check/verifyAdminAccess`, {}, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,13 +39,18 @@ const AdminPanel = () => {
                 }
             }).then(() => {
                 setIsAdmin(true);
+                // Set loading to false after a 1 second delay
+                setTimeout(() => {
+                    setLoading(false);
+                }, 1000);
             }).catch((err) => {
                 localStorage.removeItem('admin-token');
                 console.error(err);
+                setLoading(false);
                 navigate('/login');
             });
         }
-    }, [navigate]);
+    }, [navigate, setIsAdmin, BASE_URL]);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -52,7 +59,6 @@ const AdminPanel = () => {
                 setUserCount(response.data.userCount);
                 setProductCount(response.data.productCount);
                 setOrderCount(response.data.orderCount);
-
             } catch (error) {
                 console.error('Error fetching details:', error);
             }
@@ -61,7 +67,7 @@ const AdminPanel = () => {
         if (isAdmin && section === 'overview') {
             fetchDetails();
         }
-    }, [isAdmin, section]);
+    }, [isAdmin, section, BASE_URL]);
 
     const fetchCategories = async () => {
         try {
@@ -72,12 +78,11 @@ const AdminPanel = () => {
         }
     };
 
-    fetchCategories()
     useEffect(() => {
         if (isAdmin && section === 'products') {
             fetchCategories();
         }
-    }, [isAdmin, section]);
+    }, [isAdmin, section, BASE_URL]);
 
     const handleSectionClick = (selectedSection) => {
         setSection(selectedSection);
@@ -92,9 +97,14 @@ const AdminPanel = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('admin-token');
-        setIsAdmin(false)
+        setIsAdmin(false);
         navigate('/login');
     };
+
+    // Show table loader while loading
+    if (loading) {
+        return <TableLoader />;
+    }
 
     return isAdmin ? (
         <div className="admin-panel">

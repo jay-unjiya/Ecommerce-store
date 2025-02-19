@@ -9,6 +9,8 @@ export const CartProvider = ({ children }) => {
   const [checkbox, setCheckbox] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loadingCartProducts, setLoadingCartProducts] = useState({});
+
   const navigate = useNavigate();
   const location = useLocation();
   const BASE_URL = "https://ecommerce-store-backend-five.vercel.app/api";
@@ -18,12 +20,12 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-  
+
       if (token) {
         const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
         });
-  
+
         if (res.data.success) {
           const userId = res.data.id;
           const response = await fetch(`${BASE_URL}/cart/${userId}`);
@@ -33,7 +35,7 @@ export const CartProvider = ({ children }) => {
               setProducts([]);
               return;
             }
-            
+
             const productDetails = await Promise.all(
               data.cart.map(async ({ productId, quantity }) => {
                 const res = await fetch(`${BASE_URL}/products/${productId}`);
@@ -52,13 +54,13 @@ export const CartProvider = ({ children }) => {
           setProducts([]);
           return;
         }
-        
+
         const productIds = JSON.parse(savedProducts);
         if (productIds.length === 0) {
           setProducts([]);
           return;
         }
-  
+
         const productDetails = await Promise.all(
           productIds.map(async ({ productId, quantity }) => {
             const res = await fetch(`${BASE_URL}/products/${productId}`);
@@ -66,7 +68,7 @@ export const CartProvider = ({ children }) => {
             return { ...productData, quantity };
           })
         );
-  
+
         setProducts(productDetails);
       }
     } catch (error) {
@@ -128,6 +130,8 @@ export const CartProvider = ({ children }) => {
 
   const handleCartUpdate = async ({ item, quantity, openCart }) => {
     try {
+      // Set loading state for this specific product
+      setLoadingCartProducts(prev => ({ ...prev, [item._id]: true }));
 
       const savedProducts = localStorage.getItem('products');
       const currentProducts = savedProducts ? JSON.parse(savedProducts) : [];
@@ -188,12 +192,18 @@ export const CartProvider = ({ children }) => {
       if (openCart) openCart();
     } catch (error) {
       console.error('Error handling cart:', error);
+    } finally {
+      // Clear loading state for this product
+      setLoadingCartProducts(prev => ({ ...prev, [item._id]: false }));
     }
   };
 
 
   const handleAddToCart = async (productId, quantity, openCart) => {
     try {
+      // Set loading state for this specific product
+      setLoadingCartProducts(prev => ({ ...prev, [productId]: true }));
+
       const productResponse = await fetch(`${BASE_URL}/products/${productId}`);
       const productData = await productResponse.json();
 
@@ -228,7 +238,6 @@ export const CartProvider = ({ children }) => {
       });
       if (openCart) openCart();
 
-
       const token = localStorage.getItem('token');
       if (token) {
         const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
@@ -249,9 +258,11 @@ export const CartProvider = ({ children }) => {
           });
         }
       }
-
     } catch (error) {
       console.error('Error handling cart:', error);
+    } finally {
+      // Clear loading state for this product
+      setLoadingCartProducts(prev => ({ ...prev, [productId]: false }));
     }
   };
 
@@ -329,12 +340,10 @@ export const CartProvider = ({ children }) => {
       localStorage.removeItem('products');
       setProducts([]);
 
-      // Then clear from database
       if (userId) {
         await axios.delete(`${BASE_URL}/cart/clear`, { data: { id: userId } });
       }
 
-      // Force refetch to ensure sync
       await fetchCartProducts();
     } catch (error) {
       console.error('Error removing cart:', error);
@@ -349,7 +358,7 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider value={{
       products, loading, checkbox, setCheckbox, handleAddToCart, handleRemove, syncCartAfterLogin, removeCart,
-      handleQuantityChange, calculateSubtotal, handleSubmitCart, handleCartUpdate, isAdmin, setIsAdmin, BASE_URL
+      handleQuantityChange, calculateSubtotal, handleSubmitCart, handleCartUpdate, isAdmin, setIsAdmin, BASE_URL,loadingCartProducts
     }}>
       {children}
     </CartContext.Provider>
