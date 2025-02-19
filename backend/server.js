@@ -37,18 +37,13 @@ const transporter = nodemailer.createTransport({
   
   
   const generateEmailHTML = (userName, totalPrice, cartItems) => {
-      const cartItemsList = cartItems
-        .map(item => `<li>${item.name} - ${item.quantity} x ${item.price}</li>`)
-        .join('');
+      
       return `
         <html>
           <body>
             <h1>Order Confirmation</h1>
             <p>Hello ${userName},</p>
             <p>Your order has been successfully placed. Below are the details:</p>
-            <ul>
-              ${cartItemsList}
-            </ul>
             <p><strong>Total Price:</strong> ${totalPrice}</p>
             <p>Thank you for shopping with us!</p>
           </body>
