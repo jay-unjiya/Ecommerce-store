@@ -18,17 +18,22 @@ export const CartProvider = ({ children }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-
+  
       if (token) {
         const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
         });
-
+  
         if (res.data.success) {
           const userId = res.data.id;
           const response = await fetch(`${BASE_URL}/cart/${userId}`);
           const data = await response.json();
           if (data.success) {
+            if (!data.cart || data.cart.length === 0) {
+              setProducts([]);
+              return;
+            }
+            
             const productDetails = await Promise.all(
               data.cart.map(async ({ productId, quantity }) => {
                 const res = await fetch(`${BASE_URL}/products/${productId}`);
@@ -37,12 +42,23 @@ export const CartProvider = ({ children }) => {
               })
             );
             setProducts(productDetails);
+          } else {
+            setProducts([]);
           }
         }
       } else {
         const savedProducts = localStorage.getItem('products');
-        const productIds = savedProducts ? JSON.parse(savedProducts) : [];
-
+        if (!savedProducts) {
+          setProducts([]);
+          return;
+        }
+        
+        const productIds = JSON.parse(savedProducts);
+        if (productIds.length === 0) {
+          setProducts([]);
+          return;
+        }
+  
         const productDetails = await Promise.all(
           productIds.map(async ({ productId, quantity }) => {
             const res = await fetch(`${BASE_URL}/products/${productId}`);
@@ -50,17 +66,18 @@ export const CartProvider = ({ children }) => {
             return { ...productData, quantity };
           })
         );
-
+  
         setProducts(productDetails);
       }
     } catch (error) {
       console.error('Error fetching cart:', error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
   };
 
-    
+
   const checkAdminLogin = () => {
     const adminToken = localStorage.getItem('admin-token');
     if (adminToken) {
@@ -85,34 +102,33 @@ export const CartProvider = ({ children }) => {
 
   const saveCartToDatabase = async (product) => {
     try {
-      if(localStorage.getItem('products'))
-      {
+      if (localStorage.getItem('products')) {
 
         console.log(product)
         const token = localStorage.getItem('token');
         if (token) {
-        const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
-        });
-
-        if (res.data.success) {
-          const userId = res.data.id;
-          await axios.post(`${BASE_URL}/cart/save`, {
-            userId, 
-            items: product.map(product => ({ productId: product._id, quantity: product.quantity }))
+          const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
           });
+
+          if (res.data.success) {
+            const userId = res.data.id;
+            await axios.post(`${BASE_URL}/cart/save`, {
+              userId,
+              items: product.map(product => ({ productId: product._id, quantity: product.quantity }))
+            });
+          }
         }
       }
-    }
     } catch (error) {
       console.error('Error saving cart:', error);
     }
   };
 
 
-   const handleCartUpdate = async ({ item, quantity, openCart }) => {
+  const handleCartUpdate = async ({ item, quantity, openCart }) => {
     try {
- 
+
       const savedProducts = localStorage.getItem('products');
       const currentProducts = savedProducts ? JSON.parse(savedProducts) : [];
       const existingProduct = currentProducts.find(product => product.productId === item._id);
@@ -120,8 +136,8 @@ export const CartProvider = ({ children }) => {
 
       if (existingProduct) {
         updatedProducts = currentProducts.map(product =>
-          product.productId === item._id 
-            ? { ...product, quantity: product.quantity + quantity } 
+          product.productId === item._id
+            ? { ...product, quantity: product.quantity + quantity }
             : product
         ).filter(product => product.quantity > 0);
       } else {
@@ -188,8 +204,8 @@ export const CartProvider = ({ children }) => {
 
       if (existingProduct) {
         updatedProducts = currentProducts.map(item =>
-          item.productId === productId 
-            ? { ...item, quantity: item.quantity + quantity } 
+          item.productId === productId
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       } else {
@@ -238,14 +254,14 @@ export const CartProvider = ({ children }) => {
       console.error('Error handling cart:', error);
     }
   };
-  
+
   const syncCartAfterLogin = async (userId) => {
     try {
       const localCart = JSON.parse(localStorage.getItem('products')) || [];
-      
+
       const dbCartRes = await axios.get(`${BASE_URL}/cart/${userId}`);
       let dbCart = [];
-      
+
       if (dbCartRes.data.success) {
         dbCart = dbCartRes.data.cart;
       }
@@ -255,14 +271,14 @@ export const CartProvider = ({ children }) => {
         cartMap.set(productId, (cartMap.get(productId) || 0) + quantity);
       });
 
-      const mergedCart = Array.from(cartMap, ([productId, quantity]) => ({ 
-        productId, 
-        quantity 
+      const mergedCart = Array.from(cartMap, ([productId, quantity]) => ({
+        productId,
+        quantity
       }));
 
-      await axios.post(`${BASE_URL}/cart/save`, { 
-        userId, 
-        items: mergedCart 
+      await axios.post(`${BASE_URL}/cart/save`, {
+        userId,
+        items: mergedCart
       });
 
       localStorage.setItem('products', JSON.stringify(mergedCart));
@@ -272,11 +288,11 @@ export const CartProvider = ({ children }) => {
       console.error('Error syncing cart after login:', error);
     }
   };
-  const manageCartSignup = async()=>{
+  const manageCartSignup = async () => {
     const localCart = JSON.parse(localStorage.getItem('products')) || [];
-    await axios.post(`${BASE_URL}/cart/save`, { 
-      userId, 
-      items: mergedCart 
+    await axios.post(`${BASE_URL}/cart/save`, {
+      userId,
+      items: mergedCart
     });
   }
 
@@ -307,21 +323,33 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const removeCart = async(userId) => {
-    localStorage.removeItem('products');
-    setProducts([]);
-    await axios.delete(`${BASE_URL}/cart/clear`, {data:{id:userId}});
+  const removeCart = async (userId) => {
+    try {
+      // Clear local state first
+      localStorage.removeItem('products');
+      setProducts([]);
 
+      // Then clear from database
+      if (userId) {
+        await axios.delete(`${BASE_URL}/cart/clear`, { data: { id: userId } });
+      }
+
+      // Force refetch to ensure sync
+      await fetchCartProducts();
+    } catch (error) {
+      console.error('Error removing cart:', error);
+    }
   };
+
 
   useEffect(() => {
     saveCartToDatabase(products);
   }, [products]);
 
   return (
-    <CartContext.Provider value={{ 
-      products, loading, checkbox, setCheckbox, handleAddToCart,handleRemove,syncCartAfterLogin,removeCart,
-      handleQuantityChange, calculateSubtotal, handleSubmitCart,handleCartUpdate,isAdmin,setIsAdmin,BASE_URL
+    <CartContext.Provider value={{
+      products, loading, checkbox, setCheckbox, handleAddToCart, handleRemove, syncCartAfterLogin, removeCart,
+      handleQuantityChange, calculateSubtotal, handleSubmitCart, handleCartUpdate, isAdmin, setIsAdmin, BASE_URL
     }}>
       {children}
     </CartContext.Provider>
