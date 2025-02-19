@@ -53,11 +53,11 @@ router.get('/:userId', async (req, res) => {
 
 router.delete('/clear', async (req, res) => {
     console.log("reqbody",req.body)
-    console.log("reqbodyuserid",req.body.uesrId)
-    const  userId  = req.body;
-    console.log('Request to delete cart:', { userId });
+    console.log("reqbodyuserid",req.body.id)
+    const  {id} = req.body;
+    console.log('Request to delete cart:', { id });
     try {
-        await Cart.findOneAndDelete({ userId });
+        await Cart.findOneAndDelete({ id});
         res.status(200).json({ success: true, message: 'Cart deleted successfully' });
     } catch (error) {
         console.error('Error deleting cart:', error);

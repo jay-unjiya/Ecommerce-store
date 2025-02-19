@@ -94,7 +94,7 @@ const Checkout = ({ product, onClose }) => {
 
           localStorage.removeItem('products');
 
-          await axios.delete(`${BASE_URL}/cart/clear`, { userId });
+          await axios.delete(`${BASE_URL}/cart/clear`, {data:{id:userId}});
 
           navigate('/confirm');
         } else {
