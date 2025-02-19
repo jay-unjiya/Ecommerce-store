@@ -15,7 +15,7 @@ const Confirm = () => {
         setTimeout(() => {
             setLoading(false)
 
-        }, 3000)
+        }, 1000)
     }, [])
 
     return (
@@ -24,7 +24,7 @@ const Confirm = () => {
             display: 'grid', height: '100vh', placeContent: 'center', textAlign: 'center'
         }}>
             {
-                loading ? <div className="loader"></div> : <div className='confirm'>
+                loading ? <div className="fancy-spinner"></div> : <div className='confirm'>
                     <img src={img} alt="" />
                     <h1>Your Order is Confirmed</h1>
                     <button onClick={() => navigate('/')}>Continue Shopping</button>

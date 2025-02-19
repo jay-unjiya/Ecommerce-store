@@ -26,7 +26,7 @@ const Collection = () => {
     <>
       <div style={{ display: 'grid', placeContent: 'center', height: '100vh' }}>
         {loading ? (
-          <div className="loader"></div>
+          <div className="fancy-spinner"></div>
         ) : errors ? (
           <div>Failed to load products. Please try again later.</div>
         ) : (

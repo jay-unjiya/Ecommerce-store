@@ -88,15 +88,14 @@ const Checkout = ({ product, onClose }) => {
           const userId = res.data.id;
           const cartItems = cart.length > 0 ? cart : [product];
           console.log(cartItems);
-          await axios.post(`${BASE_URL}/orders/create`, { userId, totalPrice,cartItems });
+
+          await axios.post(`${BASE_URL}/orders/create`, { userId, totalPrice, cartItems });
 
           localStorage.removeItem('products');
 
-          await axios.delete(`${BASE_URL}/cart/clear`, {
-            data: { userId }
-          });
+          await axios.delete(`${BASE_URL}/cart/clear`, { userId });
 
-          // setIsModelOpen(true)
+          navigate('/confirm');
         } else {
           navigate('/login');
         }
@@ -351,7 +350,7 @@ const Checkout = ({ product, onClose }) => {
             </Elements>
           </div>
         )}
-        
+
       </div>
     </div>
   );

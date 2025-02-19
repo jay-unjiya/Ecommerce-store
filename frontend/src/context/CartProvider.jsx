@@ -12,6 +12,7 @@ export const CartProvider = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const BASE_URL = "https://ecommerce-store-backend-five.vercel.app/api";
+  // const BASE_URL = "https://localhost:5000/api";
 
   const fetchCartProducts = async () => {
     try {

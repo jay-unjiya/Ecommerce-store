@@ -14,8 +14,8 @@ $product-delprice-color: #777;
 $collection-btn-bg: $black;
 $collection-btn-color: $white;
 $collection-btn-hover-bg: #333;
-$grid-gap: 4%;
-$row-grid-gap: 1%;
+$grid-gap: 2.5rem;
+$row-grid-gap: 2.5rem;
 
 $font-family: 'Rajdhani', sans-serif;
 
@@ -158,3 +158,5 @@ $font-family: 'Rajdhani', sans-serif;
 body::-webkit-scrollbar{
   display: none;
 }
+
+

@@ -28,7 +28,7 @@ const Home = () => {
                 <div style={{
                     display:'grid',placeContent:'center',height:'100vh'
                 }}>
-                     <div className="loader"></div>
+                     <div className="fancy-spinner"></div>
                 </div>
             ):<><Carousel />
             <ImageSection />
