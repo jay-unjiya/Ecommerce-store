@@ -275,48 +275,44 @@ export const CartProvider = ({ children }) => {
 
   const syncCartAfterLogin = async (userId) => {
     try {
-      // Set a flag to prevent auto-saving during sync
       setPreventSave(true);
 
-      // Get local cart
       const localCart = JSON.parse(localStorage.getItem('products')) || [];
 
-      // If local cart is empty, just fetch from DB
       if (localCart.length === 0) {
         await fetchCartProducts();
         setPreventSave(false);
         return;
       }
 
-      // Fetch DB cart
-      const dbCartRes = await axios.get(`${BASE_URL}/cart/${userId}`);
       let dbCart = [];
-
-      if (dbCartRes.data.success && dbCartRes.data.cart) {
-        dbCart = dbCartRes.data.cart;
+      try {
+        const dbCartRes = await axios.get(`${BASE_URL}/cart/${userId}`);
+        if (dbCartRes.data.success && dbCartRes.data.cart) {
+          dbCart = dbCartRes.data.cart;
+        }
+      } catch (error) {
+        console.warn('Cart not found in the database or another error occurred:', error);
+        dbCart = [];
       }
 
-      // Merge carts
       const cartMap = new Map();
 
-      // Add DB items first
       dbCart.forEach(item => {
         cartMap.set(item.productId, item.quantity);
       });
 
-      // Add local items, combining quantities
       localCart.forEach(item => {
         const currentQuantity = cartMap.get(item.productId) || 0;
         cartMap.set(item.productId, currentQuantity + item.quantity);
       });
 
-      // Convert Map to array
       const mergedCart = Array.from(cartMap, ([productId, quantity]) => ({
         productId,
         quantity
       }));
+      console.log(mergedCart);
 
-      // Save merged cart
       if (mergedCart.length > 0) {
         await axios.post(`${BASE_URL}/cart/save`, {
           userId,
@@ -325,7 +321,6 @@ export const CartProvider = ({ children }) => {
 
         localStorage.setItem('products', JSON.stringify(mergedCart));
 
-        // Get full product details
         try {
           const productDetails = await Promise.all(
             mergedCart.map(async ({ productId, quantity }) => {
@@ -338,25 +333,23 @@ export const CartProvider = ({ children }) => {
           setProducts(productDetails);
         } catch (productError) {
           console.error('Error fetching product details:', productError);
-          // Fallback to fetchCartProducts
           await fetchCartProducts();
         }
       } else {
-        // Clear everything if merged cart is empty
         await removeCart(userId);
       }
     } catch (error) {
       console.error('Error syncing cart after login:', error);
-      // Fallback to basic fetch
       await fetchCartProducts();
     } finally {
       setPreventSave(false);
     }
   };
 
+
+
   const handleRemove = async (id) => {
     try {
-      // Set prevent save flag to avoid automatic save by the useEffect
       setPreventSave(true);
 
       const updatedProducts = products.filter((product) => product._id !== id);

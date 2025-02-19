@@ -12,7 +12,7 @@ router.post('/save', async (req, res) => {
         const existingCart = await Cart.findOne({ userId });
         console.log("exicart",existingCart)
         const newItems = items.map(item => ({
-            productId: new mongoose.Types.ObjectId(item.productId),
+            productId: new mongoose.Types.ObjectId(item.productId), 
             quantity: item.quantity
         }));
         console.log(newItems)
