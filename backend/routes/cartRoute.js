@@ -57,7 +57,7 @@ router.delete('/clear', async (req, res) => {
     const  {id} = req.body;
     console.log('Request to delete cart:', { id });
     try {
-        await Cart.deleteOne({id});
+        await Cart.deleteOne({userId:id});
         res.status(200).json({ success: true, message: 'Cart deleted successfully' });
     } catch (error) {
         console.error('Error deleting cart:', error);
