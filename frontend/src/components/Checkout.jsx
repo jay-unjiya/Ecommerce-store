@@ -84,8 +84,9 @@ const Checkout = ({ product, onClose }) => {
             'Authorization': `Bearer ${token}`
           }
         });
+        const userId = res.data.id;
+        console.log("hiiii",userId)
         if (res.data.success) {
-          const userId = res.data.id;
           const cartItems = cart.length > 0 ? cart : [product];
           console.log(cartItems);
 
