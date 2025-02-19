@@ -85,7 +85,7 @@ const Checkout = ({ product, onClose }) => {
           }
         });
         const userId = res.data.id;
-        console.log("hiiii",userId)
+        console.log("hiiii",res.data)
         if (res.data.success) {
           const cartItems = cart.length > 0 ? cart : [product];
           console.log(cartItems);

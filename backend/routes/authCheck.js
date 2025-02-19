@@ -7,6 +7,6 @@ route.post('/verifyAccess', authCheck, (req, res) => {
 });
 
 route.post('/verifyAdminAccess', authCheck, (req, res) => {
-    res.status(200).json({ message: 'Access Granted', success: true, id: req.user.id });
+    res.status(200).json({ message: 'Access Granted', success: true, id: req.user.id,user:req.user });
 });
 module.exports = route;
