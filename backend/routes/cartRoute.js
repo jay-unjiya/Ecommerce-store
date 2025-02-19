@@ -52,18 +52,14 @@ router.get('/:userId', async (req, res) => {
 });
 
 router.delete('/clear', async (req, res) => {
-    console.log("reqbody",req.body)
-    console.log("reqbodyuserid",req.body.id)
-    const  {id} = req.body;
-    console.log('Request to delete cart:', { id });
+    const { userId } = req.body;
     try {
-        await Cart.deleteMany({userId:id});
+        await Cart.deleteMany({ userId: userId });
         res.status(200).json({ success: true, message: 'Cart deleted successfully' });
     } catch (error) {
         console.error('Error deleting cart:', error);
         res.status(500).json({ success: false, message: 'Error deleting cart', error });
     }
 });
-
 
 module.exports = router;

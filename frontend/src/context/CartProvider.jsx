@@ -99,7 +99,6 @@ export const CartProvider = ({ children }) => {
 
   const saveCartToDatabase = async (products) => {
     try {
-      // If preventSave flag is set or products array is empty, don't save
       if (preventSave || !products || products.length === 0) {
         return;
       }
@@ -142,7 +141,6 @@ export const CartProvider = ({ children }) => {
         updatedProducts = [...currentProducts, { productId: item._id, quantity }];
       }
 
-      // Don't save empty arrays to localStorage
       if (updatedProducts.length > 0) {
         localStorage.setItem('products', JSON.stringify(updatedProducts));
       } else {
@@ -183,7 +181,6 @@ export const CartProvider = ({ children }) => {
               }))
             });
           } else {
-            // If cart is empty, clear it from the database
             await axios.delete(`${BASE_URL}/cart/clear`, { data: { userId } });
           }
         }
@@ -199,30 +196,17 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+
   const handleAddToCart = async (productId, quantity, openCart) => {
     try {
       setLoadingCartProducts(prev => ({ ...prev, [productId]: true }));
 
+      // Get fresh product data
       const productResponse = await fetch(`${BASE_URL}/products/${productId}`);
       const productData = await productResponse.json();
 
-      const savedProducts = localStorage.getItem('products');
-      const currentProducts = savedProducts ? JSON.parse(savedProducts) : [];
-      const existingProduct = currentProducts.find(item => item.productId === productId);
+      // Calculate the updated products first
       let updatedProducts;
-
-      if (existingProduct) {
-        updatedProducts = currentProducts.map(item =>
-          item.productId === productId
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      } else {
-        updatedProducts = [...currentProducts, { productId, quantity }];
-      }
-
-      localStorage.setItem('products', JSON.stringify(updatedProducts));
-
       setProducts(prevProducts => {
         const existingProductIndex = prevProducts.findIndex(p => p._id === productId);
         if (existingProductIndex >= 0) {
@@ -231,15 +215,38 @@ export const CartProvider = ({ children }) => {
             ...newProducts[existingProductIndex],
             quantity: newProducts[existingProductIndex].quantity + quantity
           };
+          updatedProducts = newProducts; // Store for use outside setState
           return newProducts;
         }
-        return [...prevProducts, { ...productData, quantity }];
+        updatedProducts = [...prevProducts, { ...productData, quantity }]; // Store for use outside setState
+        return updatedProducts;
       });
-      
+
+      // Get current localStorage data and update it
+      const savedProducts = localStorage.getItem('products');
+      const currentProducts = savedProducts ? JSON.parse(savedProducts) : [];
+
+      const existingLocalProduct = currentProducts.find(item => item.productId === productId);
+      let updatedLocalCart;
+
+      if (existingLocalProduct) {
+        updatedLocalCart = currentProducts.map(item =>
+          item.productId === productId
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        updatedLocalCart = [...currentProducts, { productId, quantity }];
+      }
+
+      localStorage.setItem('products', JSON.stringify(updatedLocalCart));
+
+      // Open cart if needed
       if (openCart && typeof openCart === 'function') {
         openCart();
       }
 
+      // Update database ONCE with the correctly calculated items
       const token = localStorage.getItem('token');
       if (token) {
         const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
@@ -253,10 +260,7 @@ export const CartProvider = ({ children }) => {
           const userId = res.data.id;
           await axios.post(`${BASE_URL}/cart/save`, {
             userId,
-            items: updatedProducts.map(product => ({
-              productId: product.productId,
-              quantity: product.quantity
-            }))
+            items: updatedLocalCart // Use the local cart we just updated
           });
         }
       }
@@ -267,61 +271,86 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+
+
   const syncCartAfterLogin = async (userId) => {
     try {
-      // Get local cart from localStorage
+      // Set a flag to prevent auto-saving during sync
+      setPreventSave(true);
+
+      // Get local cart
       const localCart = JSON.parse(localStorage.getItem('products')) || [];
-      
-      // Skip syncing if there's nothing in the local cart
+
+      // If local cart is empty, just fetch from DB
       if (localCart.length === 0) {
         await fetchCartProducts();
+        setPreventSave(false);
         return;
       }
-      
-      // Fetch the database cart for the logged-in user
+
+      // Fetch DB cart
       const dbCartRes = await axios.get(`${BASE_URL}/cart/${userId}`);
       let dbCart = [];
-      
+
       if (dbCartRes.data.success && dbCartRes.data.cart) {
         dbCart = dbCartRes.data.cart;
       }
-      
-      // Merge the carts, handling duplicates by adding quantities
+
+      // Merge carts
       const cartMap = new Map();
-      
-      // Add all items from both carts to the Map
-      [...localCart, ...dbCart].forEach(item => {
-        const productId = item.productId;
-        const currentQuantity = cartMap.get(productId) || 0;
-        cartMap.set(productId, currentQuantity + item.quantity);
+
+      // Add DB items first
+      dbCart.forEach(item => {
+        cartMap.set(item.productId, item.quantity);
       });
-      
-      // Convert the Map back to an array
+
+      // Add local items, combining quantities
+      localCart.forEach(item => {
+        const currentQuantity = cartMap.get(item.productId) || 0;
+        cartMap.set(item.productId, currentQuantity + item.quantity);
+      });
+
+      // Convert Map to array
       const mergedCart = Array.from(cartMap, ([productId, quantity]) => ({
         productId,
         quantity
       }));
-      
-      // Only save if there are items in the merged cart
+
+      // Save merged cart
       if (mergedCart.length > 0) {
-        // Save the merged cart to the database
         await axios.post(`${BASE_URL}/cart/save`, {
           userId,
           items: mergedCart
         });
-        
-        // Update localStorage with the merged cart
+
         localStorage.setItem('products', JSON.stringify(mergedCart));
+
+        // Get full product details
+        try {
+          const productDetails = await Promise.all(
+            mergedCart.map(async ({ productId, quantity }) => {
+              const res = await fetch(`${BASE_URL}/products/${productId}`);
+              if (!res.ok) throw new Error(`Product ${productId} not found`);
+              const productData = await res.json();
+              return { ...productData, quantity };
+            })
+          );
+          setProducts(productDetails);
+        } catch (productError) {
+          console.error('Error fetching product details:', productError);
+          // Fallback to fetchCartProducts
+          await fetchCartProducts();
+        }
       } else {
-        // If merged cart is empty, clear from database and localStorage
-        await axios.delete(`${BASE_URL}/cart/clear`, { data: { userId } });
-        localStorage.removeItem('products');
+        // Clear everything if merged cart is empty
+        await removeCart(userId);
       }
-      
-      // Refresh the cart display
-      await fetchCartProducts();
     } catch (error) {
       console.error('Error syncing cart after login:', error);
+      // Fallback to basic fetch
+      await fetchCartProducts();
+    } finally {
+      setPreventSave(false);
     }
   };
 
@@ -329,25 +358,25 @@ export const CartProvider = ({ children }) => {
     try {
       // Set prevent save flag to avoid automatic save by the useEffect
       setPreventSave(true);
-      
+
       const updatedProducts = products.filter((product) => product._id !== id);
       setProducts(updatedProducts);
-      
+
       if (updatedProducts.length > 0) {
-        const updatedLocalCart = updatedProducts.map(({ _id, quantity }) => ({ 
-          productId: _id, 
-          quantity 
+        const updatedLocalCart = updatedProducts.map(({ _id, quantity }) => ({
+          productId: _id,
+          quantity
         }));
-        
+
         localStorage.setItem('products', JSON.stringify(updatedLocalCart));
-        
+
         // Also update database if user is logged in
         const token = localStorage.getItem('token');
         if (token) {
           const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
           });
-          
+
           if (res.data.success) {
             const userId = res.data.id;
             await axios.post(`${BASE_URL}/cart/save`, {
@@ -359,14 +388,14 @@ export const CartProvider = ({ children }) => {
       } else {
         // If cart is now empty, clear it completely
         localStorage.removeItem('products');
-        
+
         // Clear from database if logged in
         const token = localStorage.getItem('token');
         if (token) {
           const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
           });
-          
+
           if (res.data.success) {
             const userId = res.data.id;
             await axios.delete(`${BASE_URL}/cart/clear`, { data: { userId } });
@@ -387,20 +416,20 @@ export const CartProvider = ({ children }) => {
     try {
       // Set prevent save flag to avoid automatic save by the useEffect
       setPreventSave(true);
-      
+
       const updatedProducts = products.map(product =>
         product._id === id ? { ...product, quantity: newQuantity } : product
       );
-      
+
       setProducts(updatedProducts);
-      
-      const updatedLocalCart = updatedProducts.map(({ _id, quantity }) => ({ 
-        productId: _id, 
-        quantity 
+
+      const updatedLocalCart = updatedProducts.map(({ _id, quantity }) => ({
+        productId: _id,
+        quantity
       }));
-      
+
       localStorage.setItem('products', JSON.stringify(updatedLocalCart));
-      
+
       // Also update database if user is logged in
       const token = localStorage.getItem('token');
       if (token) {
@@ -408,7 +437,7 @@ export const CartProvider = ({ children }) => {
           const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
           });
-          
+
           if (res.data.success) {
             const userId = res.data.id;
             await axios.post(`${BASE_URL}/cart/save`, {
@@ -443,48 +472,50 @@ export const CartProvider = ({ children }) => {
 
   const removeCart = async (userId) => {
     try {
-      // Set prevent save flag to avoid automatic save by the useEffect
       setPreventSave(true);
-      
-      // Clear local state first
+
       localStorage.removeItem('products');
       setProducts([]);
 
       if (userId) {
-        await axios.delete(`${BASE_URL}/cart/clear`, { data: { userId } });
+        await axios.delete(`${BASE_URL}/cart/clear`, {
+          data: { userId: userId }
+        });
       }
 
       await fetchCartProducts();
     } catch (error) {
       console.error('Error removing cart:', error);
     } finally {
-      // Reset prevent save flag after operation completes
       setTimeout(() => setPreventSave(false), 100);
     }
   };
 
   useEffect(() => {
-    if (!preventSave && products.length > 0) {
-      saveCartToDatabase(products);
-    }
+    const saveCart = async () => {
+      if (!preventSave && products.length > 0) {
+        await saveCartToDatabase(products);
+      }
+    };
+    saveCart();
   }, [products, preventSave]);
 
   return (
     <CartContext.Provider value={{
-      products, 
-      loading, 
-      checkbox, 
-      setCheckbox, 
-      handleAddToCart, 
-      handleRemove, 
-      syncCartAfterLogin, 
+      products,
+      loading,
+      checkbox,
+      setCheckbox,
+      handleAddToCart,
+      handleRemove,
+      syncCartAfterLogin,
       removeCart,
-      handleQuantityChange, 
-      calculateSubtotal, 
-      handleSubmitCart, 
-      handleCartUpdate, 
-      isAdmin, 
-      setIsAdmin, 
+      handleQuantityChange,
+      calculateSubtotal,
+      handleSubmitCart,
+      handleCartUpdate,
+      isAdmin,
+      setIsAdmin,
       BASE_URL,
       loadingCartProducts
     }}>
