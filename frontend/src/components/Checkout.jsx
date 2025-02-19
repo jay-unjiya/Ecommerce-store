@@ -81,19 +81,28 @@ const Checkout = ({ product, onClose }) => {
         const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
+            'Authorization': `Bearer ${token}`,
+          },
         });
         const userId = res.data.id;
-        console.log("hiiii",res.data)
+        const user = res.data.user;
+        console.log('hiiii', res.data);
         if (res.data.success) {
           const cartItems = cart.length > 0 ? cart : [product];
           console.log(cartItems);
 
           await axios.post(`${BASE_URL}/orders/create`, { userId, totalPrice, cartItems });
-
           await removeCart(userId);
 
+          // Send confirmation email
+          const emailData = {
+            userEmail: user.email,
+            userName: `${user.firstName} ${user.lastName}`,
+            totalPrice: totalPrice,
+            cartItems: JSON.stringify(cartItems), // Convert cart items to a string
+          };  
+
+          await axios.post(`${BASE_URL}/mail/send-confirmation-email`, emailData);
 
           navigate('/confirm');
         } else {
@@ -106,6 +115,7 @@ const Checkout = ({ product, onClose }) => {
       console.error('Error during checkout:', error);
     }
   };
+
 
   const handleContinue = () => {
     if (step === 'mobile' && mobile.length === 10) {
