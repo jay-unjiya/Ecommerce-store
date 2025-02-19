@@ -79,15 +79,13 @@ const Profile = () => {
 
     const handleLogout = () => {
         localStorage.clear();
-        navigate('/login');
+        navigate('/');
     };
 
-    // Show TableLoader while loading
     if (loading) {
         return <TableLoader />;
     }
 
-    // Show nothing if user data is not available yet
     if (!user) {
         return null;
     }

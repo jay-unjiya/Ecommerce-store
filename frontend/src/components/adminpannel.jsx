@@ -98,10 +98,9 @@ const AdminPanel = () => {
     const handleLogout = () => {
         localStorage.removeItem('admin-token');
         setIsAdmin(false);
-        navigate('/login');
+        navigate('/');
     };
 
-    // Show table loader while loading
     if (loading) {
         return <TableLoader />;
     }
