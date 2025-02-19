@@ -25,7 +25,7 @@ const Checkout = ({ product, onClose }) => {
   const [cart, setCart] = useState([]);
   const [isModelOpen, setIsModelOpen] = useState(false)
   const stripePromise = loadStripe('pk_test_51QrewxAu6uomlIJDKT8I4khY0DMG6c4WtX9TeG5N6lV9QpYCcMUE0T8dYIp1NjqJlmBT1HdqgcicNJaeVQ3Vd7dh00So7RqyrW');
-  const { BASE_URL } = useCart()
+  const { BASE_URL,removeCart } = useCart()
 
 
 
@@ -92,9 +92,8 @@ const Checkout = ({ product, onClose }) => {
 
           await axios.post(`${BASE_URL}/orders/create`, { userId, totalPrice, cartItems });
 
-          localStorage.removeItem('products');
+          await removeCart(userId);
 
-          await axios.delete(`${BASE_URL}/cart/clear`, {data:{id:userId}});
 
           navigate('/confirm');
         } else {

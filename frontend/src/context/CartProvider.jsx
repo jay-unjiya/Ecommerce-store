@@ -83,11 +83,14 @@ export const CartProvider = ({ children }) => {
     fetchCartProducts();
   }, [location.pathname]);
 
-  const saveCartToDatabase = async (updatedProducts) => {
+  const saveCartToDatabase = async (product) => {
     try {
-      console.log(updatedProducts)
-      const token = localStorage.getItem('token');
-      if (token) {
+      if(localStorage.getItem('products'))
+      {
+
+        console.log(product)
+        const token = localStorage.getItem('token');
+        if (token) {
         const res = await axios.post(`${BASE_URL}/check/verifyAccess`, {}, {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
         });
@@ -95,11 +98,12 @@ export const CartProvider = ({ children }) => {
         if (res.data.success) {
           const userId = res.data.id;
           await axios.post(`${BASE_URL}/cart/save`, {
-            userId,
-            items: updatedProducts.map(product => ({ productId: product._id, quantity: product.quantity }))
+            userId, 
+            items: product.map(product => ({ productId: product._id, quantity: product.quantity }))
           });
         }
       }
+    }
     } catch (error) {
       console.error('Error saving cart:', error);
     }
@@ -303,13 +307,20 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const removeCart = async(userId) => {
+    localStorage.removeItem('products');
+    setProducts([]);
+    await axios.delete(`${BASE_URL}/cart/clear`, {data:{id:userId}});
+
+  };
+
   useEffect(() => {
     saveCartToDatabase(products);
   }, [products]);
 
   return (
     <CartContext.Provider value={{ 
-      products, loading, checkbox, setCheckbox, handleAddToCart,handleRemove,syncCartAfterLogin,
+      products, loading, checkbox, setCheckbox, handleAddToCart,handleRemove,syncCartAfterLogin,removeCart,
       handleQuantityChange, calculateSubtotal, handleSubmitCart,handleCartUpdate,isAdmin,setIsAdmin,BASE_URL
     }}>
       {children}
