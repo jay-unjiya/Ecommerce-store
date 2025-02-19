@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes')
@@ -8,7 +9,6 @@ const userRoute = require('./routes/userRoute')
 const orderRoute = require('./routes/orderRoutes')
 const cartRoute = require('./routes/cartRoute')
 const stripeRoute = require('./routes/stripeRoute')
-const mailRoute = require('./routes/mailRoute')
 const cors = require('cors')
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,12 +21,69 @@ app.use('/api',userRoute)
 app.use('/api/orders',orderRoute)
 app.use('/api/cart',cartRoute)
 app.use('/api/payment',stripeRoute)
-app.use('/api/mail',mailRoute)
 
 
 app.get('/api', (req, res) => {
     res.json("hii there");
 });
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail', 
+    auth: {
+      user: process.env.EMAIL, 
+      pass: process.env.PASS, 
+    },
+  });
+  
+  
+  const generateEmailHTML = (userName, totalPrice, cartItems) => {
+      const cartItemsList = cartItems
+        .map(item => `<li>${item.name} - ${item.quantity} x ${item.price}</li>`)
+        .join('');
+      return `
+        <html>
+          <body>
+            <h1>Order Confirmation</h1>
+            <p>Hello ${userName},</p>
+            <p>Your order has been successfully placed. Below are the details:</p>
+            <ul>
+              ${cartItemsList}
+            </ul>
+            <p><strong>Total Price:</strong> ${totalPrice}</p>
+            <p>Thank you for shopping with us!</p>
+          </body>
+        </html>
+      `;
+    };
+    
+    const sendConfirmationEmail = (userEmail, userName, totalPrice, cartItems) => {
+      const emailHTML = generateEmailHTML(userName, totalPrice, cartItems);
+    
+      const mailOptions = {
+        from: process.env.EMAIL,
+        to: userEmail,
+        subject: 'Order Confirmation',
+        html: emailHTML,
+      };
+    
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Error sending email:', error);
+        } else {
+          console.log('Email sent:', info.response);
+        }
+      });
+    };
+    
+  
+  app.post('/api/send-confirmation-email', (req, res) => {
+    const { userEmail, userName, totalPrice, cartItems } = req.body;
+    sendConfirmationEmail(userEmail, userName, totalPrice, cartItems);
+    res.status(200).send('Email sent successfully');
+  });
+  
+
+
 
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
