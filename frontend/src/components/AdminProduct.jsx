@@ -19,7 +19,6 @@ const AdminProduct = ({ category }) => {
     const fetchCategories = async () => {
         try {
             const response = await axios.get(`${BASE_URL}/categories`);
-            console.log("1")
             setCategories(response.data);
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -170,7 +169,8 @@ const AdminProduct = ({ category }) => {
                                 <tr key={index}>
                                     <td>{(product.title).substring(0, 50)}</td>
                                     <td><img src={product.image} alt={product.title} className="product-image" /></td>
-                                    <td>{(product.price).toFixed(2)}</td>
+                                    {/* <td>{(product.price).toFixed(2)}</td> */}
+                                    <td>{(Number(product.price) || 0).toFixed(2)}</td>
                                     <td>{(product.description).substring(0, 50)}</td>
                                     <td>{product.category}</td>
                                     <td className='action-btn'>
@@ -194,7 +194,7 @@ const AdminProduct = ({ category }) => {
                     <label>Image</label>
                     <input type="text" name="image" value={currentProduct.image} onChange={handleInputChange} />
                     <label>Price</label>
-                    <input type="text" name="price" value={currentProduct.price} onChange={handleInputChange} />
+                    <input type="number" name="price" value={currentProduct.price} onChange={handleInputChange} />
                     <label>Description</label>
                     <textarea name="description" value={currentProduct.description} onChange={handleInputChange}></textarea>
                     <label>Brand</label>

@@ -94,7 +94,6 @@ const Checkout = ({ product, onClose }) => {
           await axios.post(`${BASE_URL}/orders/create`, { userId, totalPrice, cartItems });
           await removeCart(userId);
 
-          // Send confirmation email
           const emailData = {
             userEmail: user.email,
             userName: `${user.firstName} ${user.lastName}`,
